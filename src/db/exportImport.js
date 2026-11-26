@@ -5,6 +5,7 @@ import { APP_ID, SCHEMA_VERSION } from '../config.js';
 import { getDb, STORE_NAMES } from './db.js';
 import { rowsToCsv } from '../logic/csv.js';
 import { validateImport, migrateImport } from '../logic/importCheck.js';
+import { diaryRowsForCsv } from '../logic/diary.js';
 
 // Какие таблицы выгружаются в CSV и как называются файлы.
 export const CSV_TABLES = [
@@ -33,7 +34,13 @@ export async function exportAllData(now = new Date()) {
 
 // Одна таблица в формате CSV.
 export async function exportStoreCsv(store) {
-  const rows = await (await getDb()).getAll(store);
+  const db = await getDb();
+  const rows = await db.getAll(store);
+  if (store === 'diary') {
+    // Для дневника — понятные столбцы: каждый свой фактор отдельно.
+    const factorsRow = await db.get('settings', 'customFactors');
+    return rowsToCsv(diaryRowsForCsv(rows, factorsRow ? factorsRow.value : []));
+  }
   return rowsToCsv(rows);
 }
 

@@ -1,7 +1,8 @@
 // =====================================================================
 // Главная страница.
 // =====================================================================
-import { getAllSettings, setSetting } from '../db/repo.js';
+import { getAllSettings, setSetting, get } from '../db/repo.js';
+import { dayKeyFor } from '../logic/dates.js';
 import { hasUserData } from '../db/exportImport.js';
 import { shouldRemindBackup, snoozeUntil } from '../logic/backupReminder.js';
 import { NOT_MEDICAL, PRIVACY, CORRELATION_NOTE } from '../data/texts.js';
@@ -19,6 +20,7 @@ const SECTIONS = [
 export async function renderHome(root) {
   const settings = await getAllSettings();
   const remind = shouldRemindBackup(settings, await hasUserData());
+  const todayEntry = await get('diary', dayKeyFor());
 
   root.innerHTML = `
     <h1>Лаборатория состояния</h1>
@@ -37,6 +39,13 @@ export async function renderHome(root) {
           </section>`
         : ''
     }
+
+    <section class="card" aria-labelledby="today-title">
+      <h2 id="today-title">Сегодня</h2>
+      ${todayEntry
+        ? '<p>Запись в дневнике за сегодня есть.</p><a class="btn" href="#/diary">Открыть и изменить</a>'
+        : '<p>Записи в дневнике за сегодня пока нет. Это займёт 1–2 минуты.</p><a class="btn btn-primary" href="#/diary">Заполнить дневник</a>'}
+    </section>
 
     <section class="card card-important" aria-labelledby="not-medical-title">
       <h2 id="not-medical-title">Важно знать</h2>

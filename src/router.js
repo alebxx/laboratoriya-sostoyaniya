@@ -8,6 +8,7 @@ import { markCurrentNav } from './ui/layout.js';
 import { renderOnboarding } from './pages/onboarding.js';
 import { renderHome } from './pages/home.js';
 import { renderSettings } from './pages/settings.js';
+import { renderDiary } from './pages/diary.js';
 import { placeholder } from './pages/placeholder.js';
 
 // Таблица «адрес → функция, которая рисует страницу».
@@ -15,7 +16,7 @@ const routes = {
   '/': renderHome,
   '/onboarding': renderOnboarding,
   '/settings': renderSettings,
-  '/diary': placeholder('Дневник', 2),
+  '/diary': renderDiary,
   '/pvt': placeholder('Тест внимания', 3),
   '/charts': placeholder('Карта состояния', 4),
   '/hypotheses': placeholder('Гипотезы', 5),
@@ -28,7 +29,15 @@ const routes = {
 function currentPath() {
   const hash = location.hash;
   // Адреса страниц начинаются с «#/». Всё остальное считаем главной.
-  return hash.startsWith('#/') ? hash.slice(1) : '/';
+  if (!hash.startsWith('#/')) return '/';
+  // Часть после «?» — параметры (например, #/diary?day=2026-03-10).
+  return hash.slice(1).split('?')[0];
+}
+
+// Параметры из адреса: для #/diary?day=2026-03-10 → getParam('day') = '2026-03-10'.
+export function getParam(name) {
+  const query = location.hash.split('?')[1] || '';
+  return new URLSearchParams(query).get(name);
 }
 
 async function render() {

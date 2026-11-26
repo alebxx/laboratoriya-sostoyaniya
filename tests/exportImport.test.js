@@ -67,9 +67,21 @@ describe('экспорт и импорт', () => {
     expect(await getAll('diary')).toHaveLength(1);
   });
 
-  it('CSV-таблица дневника', async () => {
-    await put('diary', { day: '2026-03-01', stress: 4 });
-    expect(await exportStoreCsv('diary')).toBe('day;stress\r\n2026-03-01;4');
+  it('CSV-таблица дневника: постоянные столбцы и столбец для своего фактора', async () => {
+    await setSetting('customFactors', [{ id: 'f1', name: 'кофе', type: 'bool' }]);
+    await put('diary', { day: '2026-03-01', stress: 4, causes: ['учёба'], factors: { f1: true } });
+    const [header, row] = (await exportStoreCsv('diary')).split('\r\n');
+    const cols = header.split(';');
+    const cells = row.split(';');
+    expect(cols[0]).toBe('day');
+    expect(cells[cols.indexOf('stress')]).toBe('4');
+    expect(cells[cols.indexOf('causes')]).toBe('учёба');
+    expect(cells[cols.indexOf('factor: кофе')]).toBe('да');
+  });
+
+  it('CSV других таблиц — столбцы по полям записей', async () => {
+    await put('pss', { id: 'p1', total: 20 });
+    expect(await exportStoreCsv('pss')).toBe('id;total\r\np1;20');
   });
 });
 
