@@ -17,6 +17,7 @@ import { renderHypothesisNew } from './pages/hypothesisNew.js';
 import { renderHypothesisView } from './pages/hypothesisView.js';
 import { renderExperimentNew } from './pages/experimentNew.js';
 import { renderExperimentView } from './pages/experimentView.js';
+import { renderPhysio } from './pages/physio.js';
 import { placeholder } from './pages/placeholder.js';
 
 // Таблица «адрес → функция, которая рисует страницу».
@@ -33,7 +34,7 @@ const routes = {
   '/hypotheses/view': renderHypothesisView,
   '/experiments/new': renderExperimentNew,
   '/experiments/view': renderExperimentView,
-  '/physio': placeholder('Пульс и давление', 6),
+  '/physio': renderPhysio,
   '/pss': placeholder('PSS-10', 7),
   '/regulation': placeholder('Саморегуляция', 8),
   '/learn': placeholder('Как это устроено', 8),

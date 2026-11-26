@@ -735,3 +735,21 @@ tr.is-today {
 .choice-row.compact {
   margin-top: 0;
 }
+
+/* ----- Пульс и давление ----- */
+.number-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 0 12px;
+}
+
+.field input[type='datetime-local'] {
+  min-height: 44px;
+  padding: 8px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  max-width: 280px;
+}

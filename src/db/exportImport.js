@@ -10,6 +10,7 @@ import { sessionRowsForCsv, trialRowsForCsv } from '../logic/pvt.js';
 import { exclusionReason } from '../logic/sessionFilter.js';
 import { hypothesisRowsForCsv } from '../logic/hypothesis.js';
 import { allMetrics } from '../logic/series.js';
+import { physioRowsForCsv } from '../logic/physio.js';
 
 // Какие таблицы выгружаются в CSV и как называются файлы.
 export const CSV_TABLES = [
@@ -50,6 +51,9 @@ export async function exportStoreCsv(store) {
     const primaryRow = await db.get('settings', 'primaryDevice');
     const primaryType = primaryRow ? primaryRow.value.type : null;
     return rowsToCsv(sessionRowsForCsv(rows, (s) => exclusionReason(s, primaryType)));
+  }
+  if (store === 'physio') {
+    return rowsToCsv(physioRowsForCsv(rows));
   }
   if (store === 'pvtTrials') {
     return rowsToCsv(trialRowsForCsv(rows));
