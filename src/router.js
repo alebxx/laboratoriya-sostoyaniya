@@ -73,6 +73,8 @@ async function render() {
   // Пункт меню «Пилот» виден только при включённом режиме пилота.
   const pilot = await getSetting('pilot', null);
   document.getElementById('nav-pilot').hidden = !pilot?.enabled;
+  // Полоска «есть демо-данные» на всех страницах.
+  document.getElementById('demo-banner').hidden = !(await getSetting('demoLoaded', false)) || path === '/onboarding';
 
   // Если прошлая страница оставила «уборку» (например, остановить тест) — выполняем.
   if (cleanup) {

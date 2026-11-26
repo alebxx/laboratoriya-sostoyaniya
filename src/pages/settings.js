@@ -3,6 +3,7 @@
 // =====================================================================
 import { getAllSettings, setSetting, clearEverything, getAllData, deleteDemoData } from '../db/repo.js';
 import { generateCode, isValidCode, hasDemoData, PILOT_DEFAULT_AFTER_DAYS } from '../logic/pilot.js';
+import { loadDemoData } from '../db/demoLoader.js';
 import { exportAllData, exportStoreCsv, importAllData, CSV_TABLES } from '../db/exportImport.js';
 import { getTheme, setTheme } from '../ui/layout.js';
 import { downloadFile, formatDateTime, fileDate, escapeHtml } from '../ui/helpers.js';
@@ -98,6 +99,18 @@ export async function renderSettings(root) {
         <span>Файл резервной копии (.json)</span>
         <input type="file" id="import-file" accept=".json,application/json" />
       </label>
+    </section>
+
+    <section class="card" aria-labelledby="h-demo">
+      <h2 id="h-demo">Демо-режим</h2>
+      <p>Тестовые данные за 30 дней — чтобы показать графики, гипотезы и самоэксперимент, например на защите проекта.
+        Это выдуманные данные: каждая запись помечена как демо и удаляется одной кнопкой. Ваши собственные записи не затрагиваются:
+        дни, за которые уже есть запись в дневнике, пропускаются.</p>
+      ${demoPresent
+        ? '<button type="button" class="btn" id="delete-demo-2">Удалить демо-данные</button>'
+        : pilot?.enabled
+          ? '<p class="notice">Во время пилотного исследования демо-данные добавлять нельзя.</p>'
+          : '<button type="button" class="btn" id="load-demo">Заполнить тестовыми данными за 30 дней</button>'}
     </section>
 
     <section class="card" aria-labelledby="h-pilot">
@@ -232,6 +245,17 @@ export async function renderSettings(root) {
     await setSetting('pilot', { ...pilot, enabled: false });
     await rerender();
     document.getElementById('status').textContent = 'Режим пилота выключен.';
+  });
+  root.querySelector('#load-demo')?.addEventListener('click', async () => {
+    const days = await loadDemoData();
+    await rerender();
+    document.getElementById('status').textContent = `Демо-данные добавлены (дней дневника: ${days}). Посмотрите «Карту состояния» и «Гипотезы».`;
+  });
+  root.querySelector('#delete-demo-2')?.addEventListener('click', async () => {
+    if (!confirm('Удалить все демо-данные? Ваши собственные записи останутся.')) return;
+    const n = await deleteDemoData();
+    await rerender();
+    document.getElementById('status').textContent = `Демо-данные удалены (записей: ${n}).`;
   });
   root.querySelector('#delete-demo')?.addEventListener('click', async () => {
     if (!confirm('Удалить все демо-данные? Ваши собственные записи останутся.')) return;

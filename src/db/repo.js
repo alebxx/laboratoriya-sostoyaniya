@@ -88,6 +88,10 @@ export async function deleteDemoData() {
     }
   }
   await tx.done;
+  // Демо-фактор («кофе (демо)») хранится в настройках — убираем и его.
+  const factors = await getSetting('customFactors', []);
+  await setSetting('customFactors', factors.filter((f) => !f.demo));
+  await setSetting('demoLoaded', false);
   return removed;
 }
 

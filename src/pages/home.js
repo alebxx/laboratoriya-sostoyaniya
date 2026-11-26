@@ -77,6 +77,14 @@ export async function renderHome(root) {
         <a class="btn" href="#/experiments/view?id=${encodeURIComponent(e.id)}">Открыть эксперимент</a>
       </section>`).join('')}
 
+    ${!(await hasUserData()) ? `
+      <section class="card" aria-labelledby="demo-title">
+        <h2 id="demo-title">Хотите посмотреть на примере?</h2>
+        <p>В настройках можно заполнить сайт выдуманными данными за 30 дней и посмотреть, как выглядят графики и проверка гипотез.
+          Демо-данные удаляются одной кнопкой.</p>
+        <a class="btn" href="#/settings">Перейти к демо-режиму</a>
+      </section>` : ''}
+
     <section class="card card-important" aria-labelledby="not-medical-title">
       <h2 id="not-medical-title">Важно знать</h2>
       <p>${NOT_MEDICAL}</p>
