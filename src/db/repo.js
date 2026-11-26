@@ -58,6 +58,39 @@ export async function getAllSettings() {
   return result;
 }
 
+// ----- Демо-данные -----
+
+// Все записи всех хранилищ (кроме настроек) одним объектом.
+export async function getAllData() {
+  const db = await getDb();
+  const out = {};
+  for (const name of STORE_NAMES) {
+    if (name !== 'settings') out[name] = await db.getAll(name);
+  }
+  return out;
+}
+
+// Удалить только демо-записи (с пометкой demo: true). Возвращает, сколько удалено.
+export async function deleteDemoData() {
+  const db = await getDb();
+  const names = STORE_NAMES.filter((n) => n !== 'settings');
+  const tx = db.transaction(names, 'readwrite');
+  let removed = 0;
+  for (const name of names) {
+    const store = tx.objectStore(name);
+    let cursor = await store.openCursor();
+    while (cursor) {
+      if (cursor.value.demo) {
+        await cursor.delete();
+        removed++;
+      }
+      cursor = await cursor.continue();
+    }
+  }
+  await tx.done;
+  return removed;
+}
+
 // ----- Полное удаление -----
 
 // Стирает ВСЕ данные во всех хранилищах (без возможности восстановления).

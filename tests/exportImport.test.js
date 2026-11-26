@@ -126,3 +126,17 @@ describe('удаление всех данных', () => {
     expect(await getSetting('onboardingDone', false)).toBe(false);
   });
 });
+
+describe('удаление демо-данных', () => {
+  it('удаляются только записи с пометкой demo, настройки и обычные записи остаются', async () => {
+    const { deleteDemoData } = await import('../src/db/repo.js');
+    await setSetting('onboardingDone', true);
+    await put('diary', { day: '2026-03-01', stress: 4 });
+    await put('diary', { day: '2026-03-02', stress: 9, demo: true });
+    await put('pvtSessions', { id: 'd1', day: '2026-03-02', demo: true });
+    expect(await deleteDemoData()).toBe(2);
+    expect(await getAll('diary')).toEqual([{ day: '2026-03-01', stress: 4 }]);
+    expect(await getAll('pvtSessions')).toEqual([]);
+    expect(await getSetting('onboardingDone')).toBe(true);
+  });
+});

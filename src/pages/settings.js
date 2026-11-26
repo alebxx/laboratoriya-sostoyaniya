@@ -1,7 +1,8 @@
 // =====================================================================
 // Настройки и данные: тема, устройство, возраст, экспорт, импорт, удаление.
 // =====================================================================
-import { getAllSettings, setSetting, clearEverything } from '../db/repo.js';
+import { getAllSettings, setSetting, clearEverything, getAllData, deleteDemoData } from '../db/repo.js';
+import { generateCode, isValidCode, hasDemoData, PILOT_DEFAULT_AFTER_DAYS } from '../logic/pilot.js';
 import { exportAllData, exportStoreCsv, importAllData, CSV_TABLES } from '../db/exportImport.js';
 import { getTheme, setTheme } from '../ui/layout.js';
 import { downloadFile, formatDateTime, fileDate, escapeHtml } from '../ui/helpers.js';
@@ -13,6 +14,8 @@ export async function renderSettings(root) {
   const s = await getAllSettings();
   const device = s.primaryDevice || {};
   const theme = getTheme();
+  const pilot = s.pilot || null;
+  const demoPresent = hasDemoData(await getAllData());
 
   root.innerHTML = `
     <h1>Настройки и данные</h1>
@@ -97,6 +100,35 @@ export async function renderSettings(root) {
       </label>
     </section>
 
+    <section class="card" aria-labelledby="h-pilot">
+      <h2 id="h-pilot">Пилотное исследование</h2>
+      ${pilot?.enabled ? `
+        <p>Режим пилота включён. Код участника: <strong class="code">${escapeHtml(pilot.code)}</strong>, начало ${formatDateTime(pilot.startedAt)}.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#/pilot">Открыть страницу пилота</a>
+          <button type="button" class="btn btn-ghost" id="pilot-off">Выключить режим пилота</button>
+        </div>` : `
+        <p>Включайте, только если вы участвуете в пилотном исследовании. Вместо имени будет использоваться код участника,
+          появятся анкеты «до» и «после» и выгрузка данных для исследователя.</p>
+        ${demoPresent ? `
+          <p class="notice">Сейчас в базе есть демо-данные. Пока они есть, режим пилота включить нельзя —
+            чтобы они случайно не попали в исследование.</p>
+          <button type="button" class="btn" id="delete-demo">Удалить демо-данные</button>` : `
+          <form id="pilot-form" novalidate>
+            <label class="field">
+              <span>Код участника (если исследователь выдал код — введите его)</span>
+              <input type="text" id="pilot-code" maxlength="12" autocomplete="off" value="${generateCode()}" />
+            </label>
+            <p class="hint">Только латинские буквы и цифры, без имени и фамилии.</p>
+            <label class="field">
+              <span>Через сколько дней анкета «после»</span>
+              <input type="number" id="pilot-days" min="3" max="90" step="1" value="${PILOT_DEFAULT_AFTER_DAYS}" />
+            </label>
+            <div id="pilot-errors" role="alert"></div>
+            <button type="submit" class="btn btn-primary">Включить режим пилота</button>
+          </form>`}`}
+    </section>
+
     <section class="card card-danger" aria-labelledby="h-delete">
       <h2 id="h-delete">Удалить все данные</h2>
       <p>Будут удалены все записи, сеансы, гипотезы и настройки. Восстановить их можно только из резервной копии.</p>
@@ -176,6 +208,36 @@ export async function renderSettings(root) {
       say(result.error);
     }
     e.target.value = '';
+  });
+
+  // Пилот: включение, выключение, удаление демо-данных
+  root.querySelector('#pilot-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = root.querySelector('#pilot-code').value.trim();
+    const days = Number(root.querySelector('#pilot-days').value);
+    const errors = [];
+    if (!isValidCode(code)) errors.push('Код — от 2 до 12 латинских букв или цифр, без пробелов.');
+    if (!Number.isInteger(days) || days < 3 || days > 90) errors.push('Число дней — от 3 до 90.');
+    // Повторная проверка: демо-данные могли появиться в другой вкладке.
+    if (hasDemoData(await getAllData())) errors.push('В базе есть демо-данные — сначала удалите их.');
+    if (errors.length) {
+      root.querySelector('#pilot-errors').innerHTML = `<ul class="error">${errors.map((x) => `<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
+      return;
+    }
+    await setSetting('pilot', { enabled: true, code, afterDays: days, startedAt: new Date().toISOString() });
+    location.hash = '#/pilot';
+  });
+  root.querySelector('#pilot-off')?.addEventListener('click', async () => {
+    if (!confirm('Выключить режим пилота? Анкеты и данные сохранятся, но страница пилота скроется.')) return;
+    await setSetting('pilot', { ...pilot, enabled: false });
+    await rerender();
+    document.getElementById('status').textContent = 'Режим пилота выключен.';
+  });
+  root.querySelector('#delete-demo')?.addEventListener('click', async () => {
+    if (!confirm('Удалить все демо-данные? Ваши собственные записи останутся.')) return;
+    const n = await deleteDemoData();
+    await rerender();
+    document.getElementById('status').textContent = `Демо-данные удалены (записей: ${n}).`;
   });
 
   // Удаление

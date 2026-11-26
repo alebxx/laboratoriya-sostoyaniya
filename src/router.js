@@ -21,6 +21,7 @@ import { renderPhysio } from './pages/physio.js';
 import { renderPss } from './pages/pss.js';
 import { renderRegulation } from './pages/regulation.js';
 import { renderLearn } from './pages/learn.js';
+import { renderPilot } from './pages/pilot.js';
 
 // Таблица «адрес → функция, которая рисует страницу».
 const routes = {
@@ -40,6 +41,7 @@ const routes = {
   '/pss': renderPss,
   '/regulation': renderRegulation,
   '/learn': renderLearn,
+  '/pilot': renderPilot,
 };
 
 function currentPath() {
@@ -68,6 +70,9 @@ async function render() {
     return;
   }
   document.body.classList.toggle('is-onboarding', path === '/onboarding');
+  // Пункт меню «Пилот» виден только при включённом режиме пилота.
+  const pilot = await getSetting('pilot', null);
+  document.getElementById('nav-pilot').hidden = !pilot?.enabled;
 
   // Если прошлая страница оставила «уборку» (например, остановить тест) — выполняем.
   if (cleanup) {

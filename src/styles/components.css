@@ -827,3 +827,8 @@ tr.is-today {
 .tips-list p {
   margin: 4px 0;
 }
+
+.code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  letter-spacing: 0.05em;
+}

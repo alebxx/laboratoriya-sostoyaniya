@@ -3,6 +3,7 @@
 // =====================================================================
 import { getAllSettings, setSetting, get, getAll } from '../db/repo.js';
 import { conditionForDay } from '../logic/alternation.js';
+import { isAfterDue } from '../logic/pilot.js';
 import { escapeHtml } from '../ui/helpers.js';
 import { dayKeyFor } from '../logic/dates.js';
 import { hasUserData } from '../db/exportImport.js';
@@ -23,6 +24,14 @@ export async function renderHome(root) {
   const settings = await getAllSettings();
   const remind = shouldRemindBackup(settings, await hasUserData());
   const todayEntry = await get('diary', dayKeyFor());
+  // Пилот: какая анкета ждёт заполнения.
+  let pilotCard = '';
+  if (settings.pilot?.enabled) {
+    const before = await get('pilot', 'before');
+    const after = await get('pilot', 'after');
+    if (!before?.completedAt) pilotCard = 'Заполните анкету «до» — это займёт несколько минут.';
+    else if (!after?.completedAt && isAfterDue(settings.pilot, dayKeyFor())) pilotCard = 'Пора заполнить анкету «после» и выгрузить данные для исследователя.';
+  }
   // Идущие самоэксперименты: какое условие сегодня.
   const todayConditions = (await getAll('experiments'))
     .filter((e) => !e.result)
@@ -46,6 +55,13 @@ export async function renderHome(root) {
           </section>`
         : ''
     }
+
+    ${pilotCard ? `
+      <section class="card card-important" aria-labelledby="pilot-title">
+        <h2 id="pilot-title">Пилотное исследование (${escapeHtml(settings.pilot.code)})</h2>
+        <p>${pilotCard}</p>
+        <a class="btn btn-primary" href="#/pilot">Открыть</a>
+      </section>` : ''}
 
     <section class="card" aria-labelledby="today-title">
       <h2 id="today-title">Сегодня</h2>
