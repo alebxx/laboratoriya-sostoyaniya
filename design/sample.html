@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Образец оформления — Лаборатория состояния</title>
+  </head>
+  <body>
+    <main class="sample-page">
+      <header class="sample-intro">
+        <h1>Образец оформления</h1>
+        <p>Палитра, шрифт, талисман, карточки, график и кнопки в двух темах рядом. Это только образец: сайт пока не изменён.
+          После вашего подтверждения оформление будет применено ко всем страницам.</p>
+        <div class="font-compare" id="font-compare"></div>
+      </header>
+
+      <div class="theme-columns">
+        <section class="theme-col theme-light" aria-label="Светлая тема"></section>
+        <section class="theme-col theme-dark" aria-label="Тёмная тема"></section>
+      </div>
+
+      <section class="pvt-preview-wrap">
+        <h2>Экран теста PVT — один вид в обеих темах</h2>
+        <p>Тёмный фон, серая рамка, яркий стимул. Без талисмана, украшений и анимаций — чтобы оформление не влияло на время реакции.
+          Тема сайта в момент теста записывается в данные сеанса.</p>
+        <div class="pvt-preview">
+          <div class="pvt-preview-frame"><span>247</span></div>
+        </div>
+      </section>
+
+      <section class="contrast-wrap">
+        <h2>Проверка контраста (WCAG AA)</h2>
+        <p>Текст — не ниже 4,5:1, крупный текст и графические элементы (линии, значки, рамки полей) — не ниже 3:1.
+          Таблица считается прямо из переменных темы.</p>
+        <div class="contrast-tables" id="contrast"></div>
+      </section>
+    </main>
+    <script type="module" src="./sample.js"></script>
+  </body>
+</html>
