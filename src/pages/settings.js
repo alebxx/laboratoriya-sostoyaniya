@@ -1,0 +1,186 @@
+// =====================================================================
+// Настройки и данные: тема, устройство, возраст, экспорт, импорт, удаление.
+// =====================================================================
+import { getAllSettings, setSetting, clearEverything } from '../db/repo.js';
+import { exportAllData, exportStoreCsv, importAllData, CSV_TABLES } from '../db/exportImport.js';
+import { getTheme, setTheme } from '../ui/layout.js';
+import { downloadFile, formatDateTime, fileDate, escapeHtml } from '../ui/helpers.js';
+import { DEVICE_TYPES } from './onboarding.js';
+import { MIN_AGE } from '../config.js';
+import { rerender } from '../router.js';
+
+export async function renderSettings(root) {
+  const s = await getAllSettings();
+  const device = s.primaryDevice || {};
+  const theme = getTheme();
+
+  root.innerHTML = `
+    <h1>Настройки и данные</h1>
+    <p role="status" id="status" class="status"></p>
+
+    <section class="card" aria-labelledby="h-theme">
+      <h2 id="h-theme">Оформление</h2>
+      <fieldset>
+        <legend>Тема</legend>
+        <div class="radio-row">
+          ${[
+            ['system', 'Как в системе'],
+            ['light', 'Светлая'],
+            ['dark', 'Тёмная'],
+          ]
+            .map(
+              ([v, l]) => `<label class="radio-card">
+                <input type="radio" name="theme" value="${v}" ${theme === v ? 'checked' : ''} /><span>${l}</span>
+              </label>`
+            )
+            .join('')}
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="card" aria-labelledby="h-device">
+      <h2 id="h-device">Основное устройство для теста</h2>
+      <p>Сейчас: <strong>${escapeHtml(device.name || 'не выбрано')}</strong></p>
+      <form id="device-form">
+        <fieldset>
+          <legend>Тип устройства</legend>
+          <div class="radio-row">
+            ${DEVICE_TYPES.map(
+              (d) => `<label class="radio-card">
+                <input type="radio" name="device" value="${d.value}" ${device.type === d.value ? 'checked' : ''} required /><span>${d.label}</span>
+              </label>`
+            ).join('')}
+          </div>
+        </fieldset>
+        <label class="field">
+          <span>Название (необязательно)</span>
+          <input type="text" name="deviceName" maxlength="40" autocomplete="off" value="${escapeHtml(device.name || '')}" />
+        </label>
+        <p class="hint">Если сменить основное устройство, в анализ по умолчанию будут попадать сеансы теста с нового устройства.</p>
+        <button type="submit" class="btn">Сохранить устройство</button>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="h-age">
+      <h2 id="h-age">Возраст</h2>
+      <p>Ваш ответ: <strong>${s.age13plus ? `${MIN_AGE} лет или больше` : `младше ${MIN_AGE} лет`}</strong>.
+         Опросник PSS-10 доступен с ${MIN_AGE} лет.</p>
+      <button type="button" class="btn" id="age-toggle">
+        ${s.age13plus ? `Изменить: мне меньше ${MIN_AGE} лет` : `Изменить: мне уже ${MIN_AGE} лет или больше`}
+      </button>
+    </section>
+
+    <section class="card" aria-labelledby="h-export">
+      <h2 id="h-export">Резервная копия и выгрузка</h2>
+      <p>Последняя резервная копия (JSON): <strong>${formatDateTime(s.lastBackupAt)}</strong></p>
+      <p>JSON — полная копия всех данных. Из неё можно восстановить всё на этом или другом устройстве.</p>
+      <button type="button" class="btn btn-primary" id="export-json">Скачать полную копию (JSON)</button>
+
+      <h3>Таблицы CSV</h3>
+      <p>Для просмотра в Excel или Google Таблицах. Каждая таблица — отдельный файл.</p>
+      <div class="button-list">
+        ${CSV_TABLES.map(
+          (t) => `<button type="button" class="btn" data-csv="${t.store}" data-file="${t.file}">${t.title}</button>`
+        ).join('')}
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="h-import">
+      <h2 id="h-import">Загрузка из копии</h2>
+      <p><strong>Внимание:</strong> загрузка заменит все текущие данные данными из файла.</p>
+      <label class="field">
+        <span>Файл резервной копии (.json)</span>
+        <input type="file" id="import-file" accept=".json,application/json" />
+      </label>
+    </section>
+
+    <section class="card card-danger" aria-labelledby="h-delete">
+      <h2 id="h-delete">Удалить все данные</h2>
+      <p>Будут удалены все записи, сеансы, гипотезы и настройки. Восстановить их можно только из резервной копии.</p>
+      <button type="button" class="btn btn-danger" id="delete-all">Удалить все данные</button>
+    </section>`;
+
+  const status = root.querySelector('#status');
+  const say = (text) => {
+    status.textContent = text;
+  };
+
+  // Тема
+  for (const input of root.querySelectorAll('input[name="theme"]')) {
+    input.addEventListener('change', () => setTheme(input.value));
+  }
+
+  // Устройство
+  root.querySelector('#device-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = new FormData(e.target);
+    const type = form.get('device');
+    const typeLabel = DEVICE_TYPES.find((d) => d.value === type).label;
+    const name = String(form.get('deviceName') || '').trim();
+    await setSetting('primaryDevice', { type, name: name || typeLabel, userAgent: navigator.userAgent });
+    await rerender();
+    document.getElementById('status').textContent = 'Устройство сохранено.';
+  });
+
+  // Возраст
+  root.querySelector('#age-toggle').addEventListener('click', async () => {
+    await setSetting('age13plus', !s.age13plus);
+    await rerender();
+    document.getElementById('status').textContent = 'Ответ о возрасте изменён.';
+  });
+
+  // Экспорт JSON
+  root.querySelector('#export-json').addEventListener('click', async () => {
+    const data = await exportAllData();
+    downloadFile(`laboratoriya-kopiya-${fileDate()}.json`, JSON.stringify(data, null, 2), 'application/json');
+    await setSetting('lastBackupAt', new Date().toISOString());
+    await setSetting('backupSnoozedUntil', null);
+    await rerender();
+    document.getElementById('status').textContent = 'Файл с копией данных скачан.';
+  });
+
+  // Экспорт CSV
+  for (const btn of root.querySelectorAll('[data-csv]')) {
+    btn.addEventListener('click', async () => {
+      const csv = await exportStoreCsv(btn.dataset.csv);
+      downloadFile(`laboratoriya-${btn.dataset.file}-${fileDate()}.csv`, csv, 'text/csv;charset=utf-8');
+      say(`Таблица «${btn.textContent}» скачана.`);
+    });
+  }
+
+  // Импорт
+  root.querySelector('#import-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    let obj;
+    try {
+      obj = JSON.parse(await file.text());
+    } catch {
+      say('Не удалось прочитать файл: это не JSON.');
+      e.target.value = '';
+      return;
+    }
+    if (!confirm('Загрузить данные из файла? Все текущие данные будут заменены.')) {
+      e.target.value = '';
+      return;
+    }
+    const result = await importAllData(obj);
+    if (result.ok) {
+      say('Данные загружены.');
+      await rerender();
+      document.getElementById('status').textContent = 'Данные загружены из файла.';
+    } else {
+      say(result.error);
+    }
+    e.target.value = '';
+  });
+
+  // Удаление
+  root.querySelector('#delete-all').addEventListener('click', async () => {
+    if (!confirm('Удалить ВСЕ данные? Это нельзя отменить.')) return;
+    if (!confirm('Точно удалить? Если резервной копии нет, данные пропадут навсегда.')) return;
+    await clearEverything();
+    setTheme('system');
+    location.hash = '#/onboarding';
+  });
+}

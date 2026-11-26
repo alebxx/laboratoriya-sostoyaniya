@@ -1,0 +1,65 @@
+/* =====================================================================
+   Цвета светлой и тёмной темы.
+   Все цвета заданы переменными: чтобы поменять цвет на всём сайте,
+   достаточно поменять его здесь. Контраст текста к фону — не ниже 4.5:1.
+   ===================================================================== */
+
+:root {
+  /* Подсказка браузеру, какими цветами рисовать свои элементы (флажки, полосы прокрутки). */
+  color-scheme: light;
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --text: #1b1c1e;
+  --text-muted: #4f535a;
+  --border: #c9c7c0;
+  --accent: #1f4f99;
+  --accent-text: #ffffff;
+  --focus: #b35c00;
+  --important-bg: #eef3fb;
+  --important-border: #1f4f99;
+  --warning-bg: #fdf5e4;
+  --warning-border: #9a6700;
+  --danger: #a3261b;
+  --danger-text: #ffffff;
+  --radius: 10px;
+}
+
+/* Тёмная тема по настройке системы (если пользователь не выбрал светлую вручную). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #131417;
+    --surface: #1d1f23;
+    --text: #ecebe7;
+    --text-muted: #b2b5bb;
+    --border: #3d4048;
+    --accent: #8fb4ff;
+    --accent-text: #0e1420;
+    --focus: #ffb35c;
+    --important-bg: #18223a;
+    --important-border: #8fb4ff;
+    --warning-bg: #2b2312;
+    --warning-border: #e0b04a;
+    --danger: #ff8a7f;
+    --danger-text: #1f0b09;
+  }
+}
+
+/* Тёмная тема, выбранная вручную. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #131417;
+  --surface: #1d1f23;
+  --text: #ecebe7;
+  --text-muted: #b2b5bb;
+  --border: #3d4048;
+  --accent: #8fb4ff;
+  --accent-text: #0e1420;
+  --focus: #ffb35c;
+  --important-bg: #18223a;
+  --important-border: #8fb4ff;
+  --warning-bg: #2b2312;
+  --warning-border: #e0b04a;
+  --danger: #ff8a7f;
+  --danger-text: #1f0b09;
+}

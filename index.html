@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Лаборатория состояния</title>
+    <meta name="description" content="Дневник состояния, тест на внимание и проверка собственных гипотез. Не медицинский инструмент. Данные хранятся только в вашем браузере." />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+    <script>
+      // Применяем выбранную тему ДО отрисовки страницы, чтобы она не «мигала».
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <button type="button" class="skip-link" id="skip-link">Перейти к содержимому</button>
+
+    <header class="site-header">
+      <div class="header-row">
+        <a class="logo" href="#/">Лаборатория состояния</a>
+        <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Сменить тему оформления">Тема</button>
+        <button type="button" class="btn btn-ghost menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="main-nav">Меню</button>
+      </div>
+      <nav id="main-nav" aria-label="Разделы сайта">
+        <ul>
+          <li><a href="#/">Главная</a></li>
+          <li><a href="#/diary">Дневник</a></li>
+          <li><a href="#/pvt">Тест внимания</a></li>
+          <li><a href="#/physio">Пульс и давление</a></li>
+          <li><a href="#/charts">Карта состояния</a></li>
+          <li><a href="#/hypotheses">Гипотезы</a></li>
+          <li><a href="#/pss">PSS-10</a></li>
+          <li><a href="#/regulation">Саморегуляция</a></li>
+          <li><a href="#/learn">Как это устроено</a></li>
+          <li><a href="#/settings">Настройки и данные</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="app" tabindex="-1"></main>
+
+    <footer class="site-footer">
+      <p>Это не медицинский инструмент: сайт не ставит диагнозов и не оценивает здоровье. Все данные хранятся только в этом браузере.</p>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

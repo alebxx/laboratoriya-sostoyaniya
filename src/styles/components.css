@@ -1,0 +1,229 @@
+/* =====================================================================
+   Повторяющиеся элементы: карточки, кнопки, поля, плитки.
+   Все кнопки и поля — не меньше 44 пикселей в высоту (удобно пальцем).
+   ===================================================================== */
+
+.lead {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+.step-label,
+.hint {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* ----- Карточки ----- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.card-important {
+  background: var(--important-bg);
+  border-left: 5px solid var(--important-border);
+}
+
+.card-warning {
+  background: var(--warning-bg);
+  border-left: 5px solid var(--warning-border);
+}
+
+.card-danger {
+  border-left: 5px solid var(--danger);
+}
+
+.notice {
+  background: var(--warning-bg);
+  border-left: 5px solid var(--warning-border);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+}
+
+.status:empty {
+  display: none;
+}
+
+.status {
+  background: var(--important-bg);
+  border-left: 5px solid var(--important-border);
+  padding: 12px 16px;
+  border-radius: var(--radius);
+}
+
+/* ----- Кнопки ----- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 16px;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--important-bg);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+  filter: brightness(1.1);
+}
+
+.btn-ghost {
+  border-color: var(--border);
+  color: var(--text);
+  font-weight: 500;
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: var(--danger-text);
+}
+
+.btn-danger:hover {
+  background: var(--danger);
+  filter: brightness(1.1);
+}
+
+/* Кнопка-вариант: нажатая выделяется заливкой. */
+.btn-choice[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.actions,
+.choice-row,
+.button-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* ----- Поля ввода ----- */
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+legend {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 12px 0;
+}
+
+.field input[type='text'],
+.field input[type='number'],
+.field textarea,
+.field select {
+  min-height: 44px;
+  padding: 8px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.field input[type='file'] {
+  min-height: 44px;
+  font: inherit;
+}
+
+/* Варианты-радиокнопки в виде крупных карточек. */
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.radio-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.radio-card:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--important-bg);
+}
+
+.radio-card input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+/* ----- Плитки разделов на главной ----- */
+.tiles {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  min-height: 44px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.tile strong {
+  color: var(--accent);
+}
+
+.tile span {
+  color: var(--text-muted);
+}
+
+.tile:hover {
+  border-color: var(--accent);
+}

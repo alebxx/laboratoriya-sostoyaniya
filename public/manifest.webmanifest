@@ -1,0 +1,12 @@
+{
+  "name": "Лаборатория состояния",
+  "short_name": "Лаборатория",
+  "description": "Дневник состояния, тест на внимание и проверка собственных гипотез. Данные хранятся только в браузере.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#1f4f99",
+  "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
