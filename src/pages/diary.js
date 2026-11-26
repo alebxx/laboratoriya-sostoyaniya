@@ -12,7 +12,9 @@ import {
 import { shouldShowCare } from '../logic/care.js';
 import { CARE_MESSAGE } from '../data/messages.js';
 import { sliderHtml, setupSliders, readSlider } from '../ui/fields.js';
-import { escapeHtml, formatDateTime } from '../ui/helpers.js';
+import { escapeHtml, formatDateTime, statusInner } from '../ui/helpers.js';
+import { icon, CAUSE_ICONS } from '../ui/icons.js';
+import { mascot } from '../ui/mascot.js';
 import { getParam, rerender } from '../router.js';
 
 // Сообщение, которое нужно показать после перерисовки страницы
@@ -41,7 +43,7 @@ export async function renderDiary(root) {
 
   root.innerHTML = `
     <h1>Дневник</h1>
-    <p role="status" id="status" class="status">${escapeHtml(flash)}</p>
+    <p role="status" id="status" class="status ${flash ? 'pop' : ''}">${statusInner(flash)}</p>
     ${showCareCard ? careCardHtml() : ''}
 
     <div class="card day-picker">
@@ -58,12 +60,12 @@ export async function renderDiary(root) {
 
     <form id="diary-form" novalidate>
       <section class="card" aria-labelledby="h-state">
-        <h2 id="h-state">Состояние</h2>
+        <h2 id="h-state" class="card-title">Состояние</h2>
         ${SCALES.map((s) => sliderHtml(s, v[s.key])).join('')}
       </section>
 
       <section class="card" aria-labelledby="h-mood">
-        <h2 id="h-mood">Настроение</h2>
+        <h2 id="h-mood" class="card-title metric-other"><span class="metric-badge">${icon('Smile', 20)}</span>Настроение</h2>
         <fieldset>
           <legend class="visually-hidden">Настроение сегодня</legend>
           <div class="mood-row">
@@ -79,8 +81,8 @@ export async function renderDiary(root) {
       </section>
 
       <section class="card" aria-labelledby="h-sleep">
-        <h2 id="h-sleep">Сон прошлой ночью</h2>
-        ${sliderHtml({ key: 'sleepHours', label: 'Сколько часов спал(а)', ...SLEEP_HOURS, minLabel: `${SLEEP_HOURS.min} ч`, maxLabel: `${SLEEP_HOURS.max} ч`, unit: 'ч' }, v.sleepHours)}
+        <h2 id="h-sleep" class="card-title metric-sleep"><span class="metric-badge">${icon('Moon', 20)}</span>Сон прошлой ночью</h2>
+        ${sliderHtml({ key: 'sleepHours', metric: 'sleepHours', label: 'Сколько часов спал(а)', ...SLEEP_HOURS, minLabel: `${SLEEP_HOURS.min} ч`, maxLabel: `${SLEEP_HOURS.max} ч`, unit: 'ч' }, v.sleepHours)}
         ${sliderHtml(SLEEP_QUALITY, v.sleepQuality)}
       </section>
 
@@ -92,7 +94,7 @@ export async function renderDiary(root) {
             ${CAUSES.map((c) => `
               <label class="radio-card">
                 <input type="checkbox" name="causes" value="${c}" ${(v.causes || []).includes(c) ? 'checked' : ''} />
-                <span>${c}</span>
+                ${icon(CAUSE_ICONS[c], 18)}<span>${c}</span>
               </label>`).join('')}
           </div>
         </fieldset>
@@ -118,7 +120,7 @@ export async function renderDiary(root) {
       </section>
 
       <div class="actions sticky-actions">
-        <button type="submit" class="btn btn-primary">${entry ? 'Сохранить изменения' : 'Сохранить запись'}</button>
+        <button type="submit" class="btn btn-primary">${icon('Check', 18)}${entry ? 'Сохранить изменения' : 'Сохранить запись'}</button>
       </div>
     </form>
     ${entry ? '<div class="actions"><button type="button" class="btn btn-ghost" id="delete-entry">Удалить запись за этот день</button></div>' : ''}
@@ -153,7 +155,7 @@ export async function renderDiary(root) {
 
     <section aria-labelledby="h-recent">
       <h2 id="h-recent">Последние записи</h2>
-      ${recent.length === 0 ? '<p class="hint">Записей пока нет.</p>' : `
+      ${recent.length === 0 ? `<div class="empty-state">${mascot('notebook', { size: 96 })}<p>Записей пока нет. Первая запись появится здесь.</p></div>` : `
         <ul class="recent-list">
           ${recent.map((r) => `
             <li><a href="#/diary?day=${r.day}" ${r.day === day ? 'aria-current="true"' : ''}>${formatDay(r.day)}</a>

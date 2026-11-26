@@ -1,7 +1,9 @@
 // =====================================================================
 // Точка входа: отсюда запускается весь сайт.
 // =====================================================================
-import './styles/theme.css';
+// Шрифт Nunito лежит в проекте (лицензия SIL OFL 1.1) — без внешних запросов.
+import '@fontsource-variable/nunito';
+import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 

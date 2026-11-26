@@ -4,6 +4,7 @@
 // Так сайт работает на GitHub Pages без настройки сервера.
 // =====================================================================
 import { getSetting } from './db/repo.js';
+import { mascot } from './ui/mascot.js';
 import { markCurrentNav } from './ui/layout.js';
 import { renderOnboarding } from './pages/onboarding.js';
 import { renderHome } from './pages/home.js';
@@ -102,8 +103,12 @@ async function render() {
 
 function notFound(root) {
   root.innerHTML = `
-    <h1>Страница не найдена</h1>
-    <p><a href="#/">Вернуться на главную</a></p>`;
+    <div class="card empty-state">
+      ${mascot('oops', { size: 120 })}
+      <h1>Страница не найдена</h1>
+      <p>Похоже, такой страницы нет. Ваши данные в порядке.</p>
+      <p><a class="btn btn-primary" href="#/">На главную</a></p>
+    </div>`;
 }
 
 export function startRouter() {

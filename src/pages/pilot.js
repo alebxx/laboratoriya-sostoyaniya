@@ -10,7 +10,9 @@ import { rowsToCsv } from '../logic/csv.js';
 import { FACTORS_QUESTION, FEEDBACK_QUESTIONS, PILOT_INFO } from '../data/pilotTexts.js';
 import { SUS_ITEMS, SUS_ENDS, SUS_INSTRUCTION, SUS_SOURCE } from '../data/sus.js';
 import { pssFormHtml, setupPssForm } from '../ui/pssForm.js';
-import { escapeHtml, formatDateTime, downloadFile, fileDate } from '../ui/helpers.js';
+import { escapeHtml, formatDateTime, downloadFile, fileDate, showStatus } from '../ui/helpers.js';
+import { mascot } from '../ui/mascot.js';
+import { icon } from '../ui/icons.js';
 import { getParam, rerender } from '../router.js';
 
 export async function renderPilot(root) {
@@ -42,6 +44,14 @@ async function renderOverview(root, settings) {
 
   root.innerHTML = `
     <h1>Пилотное исследование</h1>
+    ${after?.completedAt ? `
+      <section class="card card-important with-mascot">
+        ${mascot('diploma', { size: 96 })}
+        <div>
+          <h2 style="margin:0">Спасибо за участие!</h2>
+          <p>Обе анкеты заполнены. Осталось выгрузить данные для исследователя (кнопка ниже) и передать файл так, как договорились.</p>
+        </div>
+      </section>` : ''}
     <section class="card">
       <p>Код участника: <strong class="code">${escapeHtml(pilot.code)}</strong></p>
       <p class="hint">Начало: ${formatDateTime(pilot.startedAt)}. Анкета «после» — через ${pilot.afterDays} дней, с ${fmtDay(afterFrom)}.</p>
@@ -53,10 +63,10 @@ async function renderOverview(root, settings) {
       <ul class="recent-list">
         <li><span>Анкета «до»</span>
           ${before?.completedAt ? `<span class="tag">заполнена ${formatDateTime(before.completedAt)}</span>`
-            : '<a class="btn btn-primary" href="#/pilot?form=before">Заполнить</a>'}</li>
+            : '<a class="btn" href="#/pilot?form=before">Заполнить</a>'}</li>
         <li><span>Анкета «после»</span>
           ${after?.completedAt ? `<span class="tag">заполнена ${formatDateTime(after.completedAt)}</span>`
-            : afterDue ? '<a class="btn btn-primary" href="#/pilot?form=after">Заполнить</a>'
+            : afterDue ? '<a class="btn" href="#/pilot?form=after">Заполнить</a>'
               : `<span class="tag">будет доступна с ${fmtDay(afterFrom)}</span>`}</li>
       </ul>
     </section>
@@ -78,11 +88,11 @@ async function renderOverview(root, settings) {
         Личные подробности убраны: заметки, «своя причина», тексты вопросов и выводов по гипотезам,
         названия своих факторов (заменены на «фактор 1», «фактор 2»…) и сведения о браузере.</p>
       <div class="actions">
-        <button type="button" class="btn btn-primary" id="export-json">Выгрузить данные для исследователя (JSON)</button>
+        <button type="button" class="btn btn-primary" id="export-json">${icon('Download', 18)}Выгрузить данные для исследователя (JSON)</button>
         <button type="button" class="btn" id="export-csv">Краткая строка для таблицы (CSV)</button>
       </div>
       <p class="hint">JSON — все данные пилота. CSV — одна строка: сводка и ответы анкет (удобно собрать строки всех участников в одну таблицу).</p>
-      <p role="status" id="export-status" class="hint"></p>
+      <p role="status" id="export-status" class="status"></p>
     </section>`;
 
   const questionnaires = { before: before || null, after: after || null };
@@ -91,12 +101,12 @@ async function renderOverview(root, settings) {
   root.querySelector('#export-json').addEventListener('click', () => {
     const exp = buildResearcherExport({ pilot: settings.pilot, questionnaires, data, factors });
     downloadFile(`pilot-${settings.pilot.code}-${fileDate()}.json`, JSON.stringify(exp, null, 2), 'application/json');
-    root.querySelector('#export-status').textContent = 'Файл скачан.';
+    showStatus(root.querySelector('#export-status'), 'Файл скачан.');
   });
   root.querySelector('#export-csv').addEventListener('click', () => {
     const row = researcherCsvRow({ pilot: settings.pilot, questionnaires, data: { ...data, pss: data.pss.filter((p) => !p.demo) } });
     downloadFile(`pilot-${settings.pilot.code}-${fileDate()}.csv`, rowsToCsv([row]), 'text/csv;charset=utf-8');
-    root.querySelector('#export-status').textContent = 'Файл скачан.';
+    showStatus(root.querySelector('#export-status'), 'Файл скачан.');
   });
 }
 

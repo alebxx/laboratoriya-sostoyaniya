@@ -7,18 +7,22 @@
 // а рядом написано «не отмечено». Кнопка «Сбросить» возвращает это состояние.
 // =====================================================================
 import { escapeHtml } from './helpers.js';
+import { icon } from './icons.js';
+import { metricClass, metricStyle } from './metricStyle.js';
 
 // HTML ползунка.
-//   opts: { key, label, min, max, step, minLabel, maxLabel, unit }
+//   opts: { key, label, min, max, step, minLabel, maxLabel, unit, metric }
+//     metric — ключ показателя (stress, sleepHours…): от него цвет и значок;
 //   value: сохранённое значение или null
 export function sliderHtml(opts, value) {
-  const { key, label, min, max, step = 1, minLabel = '', maxLabel = '', unit = '' } = opts;
+  const { key, label, min, max, step = 1, minLabel = '', maxLabel = '', unit = '', metric = key } = opts;
+  const style = metricStyle(metric);
   const touched = value !== null && value !== undefined;
   const start = touched ? value : (min + max) / 2;
   return `
-    <div class="slider-field ${touched ? '' : 'is-unset'}" data-slider="${key}">
+    <div class="slider-field ${metricClass(metric)} ${touched ? '' : 'is-unset'}" data-slider="${key}">
       <div class="slider-head">
-        <label for="s-${key}">${escapeHtml(label)}</label>
+        <label for="s-${key}">${icon(style.icon, 20)}${escapeHtml(label)}</label>
         <output id="o-${key}" for="s-${key}" aria-hidden="true"></output>
       </div>
       <input type="range" id="s-${key}" name="${key}"
@@ -47,6 +51,12 @@ function refreshSlider(input) {
   output.textContent = text;
   input.setAttribute('aria-valuetext', text);
   field.classList.toggle('is-unset', !touched);
+  // Оттенок одного цвета показателя: чем больше значение, тем насыщеннее.
+  // (Это не оценка «хорошо/плохо» — просто видно, где на шкале значение.)
+  const share = (Number(input.value) - Number(input.min)) / (Number(input.max) - Number(input.min) || 1);
+  const pct = Math.round(35 + share * 65);
+  field.style.setProperty('--shade', `color-mix(in oklab, var(--m, var(--accent)) ${pct}%, var(--surface))`);
+  field.style.setProperty('--shade-bg', `color-mix(in oklab, var(--m, var(--accent)) ${Math.round(8 + share * 18)}%, var(--surface))`);
 }
 
 // Подключить поведение всем ползункам внутри root.

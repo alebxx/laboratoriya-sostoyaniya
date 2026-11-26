@@ -80,6 +80,7 @@ export function sessionRowsForCsv(sessions, excludedReason = () => null) {
       'Интервал, мс': s.config ? `${s.config.isiMinMs}–${s.config.isiMaxMs}` : '',
       'Порог пропуска, мс': s.config?.lapseMs,
       'Кадр экрана, мс': s.frameMs,
+      'Тема сайта': s.theme ? `${s.theme.shown === 'dark' ? 'ночная' : 'дневная'}${s.theme.setting === 'system' ? ' (как в системе)' : ''}` : '',
       'User agent': s.device?.userAgent,
       'Демо-данные': s.demo ? 'да' : '',
     }));

@@ -9,17 +9,24 @@ import {
 
 Chart.register(LineController, LineElement, PointElement, ScatterController, LinearScale, CategoryScale, Tooltip, Legend);
 
+// Шрифт графиков — тот же, что у сайта.
+Chart.defaults.font.family = getComputedStyle(document.documentElement).getPropertyValue('--font').trim() || 'system-ui';
+
 // Цвета берём из текущей темы (светлой или тёмной) — из CSS-переменных.
 export function themeColors() {
   const css = getComputedStyle(document.documentElement);
   const v = (name) => css.getPropertyValue(name).trim();
   return {
-    series1: v('--series-1'),
-    series2: v('--series-2'),
+    accent: v('--accent'),
     text: v('--text'),
-    muted: v('--text-muted'),
-    grid: v('--border'),
+    muted: v('--chart-label'), // подписи осей — приглушённые
+    grid: v('--chart-grid'), // сетка — едва заметная
     surface: v('--surface'),
+    raised: v('--surface-raised'),
+    border: v('--border'),
+    // Толщина линий данных: в тёмной теме чуть толще.
+    line: parseFloat(v('--chart-line')) || 2,
+    font: v('--font'),
   };
 }
 
@@ -48,7 +55,8 @@ export function baseOptions(colors) {
     interaction: { mode: 'nearest', intersect: false },
     plugins: {
       legend: { labels: { color: colors.text, usePointStyle: true, boxWidth: 8 } },
-      tooltip: { backgroundColor: colors.surface, titleColor: colors.text, bodyColor: colors.text, borderColor: colors.grid, borderWidth: 1 },
+      // Всплывающая подсказка: светлее карточки, с тонкой рамкой.
+      tooltip: { backgroundColor: colors.raised, titleColor: colors.text, bodyColor: colors.text, borderColor: colors.border, borderWidth: 1, cornerRadius: 10, padding: 10 },
     },
   };
 }

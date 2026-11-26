@@ -11,7 +11,9 @@ import { median } from '../logic/stats.js';
 import { addDays } from '../logic/dates.js';
 import { HOW_PERMUTATION, WHY_ONCE, otherInfluences } from '../data/hypothesisTexts.js';
 import { drawDotPlot } from '../ui/dotplot.js';
-import { escapeHtml, formatDateTime } from '../ui/helpers.js';
+import { escapeHtml, formatDateTime, showStatus } from '../ui/helpers.js';
+import { icon, STEP_ICONS } from '../ui/icons.js';
+import { mascot } from '../ui/mascot.js';
 import { getParam } from '../router.js';
 
 export async function renderHypothesisView(root) {
@@ -35,9 +37,9 @@ export async function renderHypothesisView(root) {
     <p><a href="#/hypotheses?tab=check">← Все гипотезы</a></p>
     <h1>Гипотеза</h1>
     <ol class="steps" aria-label="Шаги проверки">
-      <li class="is-done">1. Вопрос</li><li class="is-done">2. План</li><li class="is-done">3. Фиксация</li>
-      <li class="${r ? 'is-done' : 'is-current'}" ${r ? '' : 'aria-current="step"'}>4. Наблюдение</li>
-      <li class="${r ? 'is-current' : ''}" ${r ? 'aria-current="step"' : ''}>5. Рассуждение</li>
+      <li class="is-done">${icon('Check', 16)}1. Вопрос</li><li class="is-done">${icon('Check', 16)}2. План</li><li class="is-done">${icon('Check', 16)}3. Фиксация</li>
+      <li class="${r ? 'is-done' : 'is-current'}" ${r ? '' : 'aria-current="step"'}>${icon(r ? 'Check' : STEP_ICONS[3], 16)}4. Наблюдение</li>
+      <li class="${r ? 'is-current' : ''}" ${r ? 'aria-current="step"' : ''}>${icon(STEP_ICONS[4], 16)}5. Рассуждение</li>
     </ol>
 
     <section class="card">
@@ -64,7 +66,7 @@ export async function renderHypothesisView(root) {
       </div>`;
     return `
       <section class="card" aria-labelledby="h-obs">
-        <h2 id="h-obs">Шаг 4. Наблюдение</h2>
+        <div class="with-mascot">${mascot('sprouts', { size: 72 })}<div><h2 id="h-obs" style="margin:0">Шаг 4. Наблюдение</h2><p class="hint">Данные растут с каждым днём.</p></div></div>
         ${bar(p.a, `A (${labelA})`)}
         ${bar(p.b, `B (${labelB})`)}
         <p class="hint">День учитывается, когда за него есть и фактор, и результат${hyp.plan.lag === 1 ? ' (результат — на следующий день)' : ''}.
@@ -80,7 +82,7 @@ export async function renderHypothesisView(root) {
     const afterB = after.filter((o) => o.group === 'B').map((o) => o.outcome);
     return `
       <section class="card" aria-labelledby="h-res">
-        <h2 id="h-res">Шаг 5. Рассуждение</h2>
+        <div class="with-mascot">${mascot('diploma', { size: 80 })}<div><h2 id="h-res" style="margin:0">Шаг 5. Рассуждение</h2><p class="hint">Проверка завершена — какой бы ни был итог, это результат.</p></div></div>
         <p class="hint">Итог посчитан ${formatDateTime(hyp.resultComputedAt)} по дням до ${fmtDay(r.cutoffDay)} включительно и больше не пересчитывается.</p>
         <p class="verdict">${VERDICT_LABELS[r.verdict]}</p>
         <p>${escapeHtml(differenceSentence(r, hyp.plan, factor, outcome))}</p>
@@ -121,7 +123,7 @@ export async function renderHypothesisView(root) {
           <span class="visually-hidden">Ваши выводы и планы</span>
           <textarea id="reflection" rows="4" maxlength="2000">${escapeHtml(hyp.reflection || '')}</textarea>
         </label>
-        <p role="status" id="saved" class="hint"></p>
+        <p role="status" id="saved" class="status"></p>
         <div class="actions">
           <button type="button" class="btn" id="save-reflection">Сохранить</button>
           <a class="btn btn-primary" href="#/hypotheses/new?from=${encodeURIComponent(hyp.id)}">Создать новую гипотезу на основе этой</a>
@@ -145,7 +147,7 @@ export async function renderHypothesisView(root) {
       chart = drawDotPlot(root.querySelector('#dots'), [
         { label: `A: ${labelA}`, values: a, median: r.medianA },
         { label: `B: ${labelB}`, values: b, median: r.medianB },
-      ], outcome?.label || '');
+      ], outcome?.label || '', hyp.plan.outcomeKey);
     };
     draw();
     window.addEventListener('themechange', draw);
@@ -153,7 +155,7 @@ export async function renderHypothesisView(root) {
     root.querySelector('#save-reflection').addEventListener('click', async () => {
       hyp = { ...hyp, reflection: root.querySelector('#reflection').value };
       await put('hypotheses', hyp);
-      root.querySelector('#saved').textContent = 'Сохранено.';
+      showStatus(root.querySelector('#saved'), 'Сохранено.');
     });
 
     root.querySelector('#delete').addEventListener('click', onDelete);

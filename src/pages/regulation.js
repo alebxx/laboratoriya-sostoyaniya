@@ -7,6 +7,7 @@ import { BREATHING } from '../config.js';
 import { phaseAt, totalMs, plannedCycles, clampSettings } from '../logic/breathing.js';
 import { TIPS } from '../data/tips.js';
 import { escapeHtml } from '../ui/helpers.js';
+import { icon } from '../ui/icons.js';
 
 const PHASE_NAMES = { inhale: 'Вдох', exhale: 'Выдох' };
 
@@ -20,7 +21,7 @@ export function renderRegulation(root) {
       для этого есть самоэксперимент с чередованием дней.</p>
 
     <section class="card" aria-labelledby="h-breath">
-      <h2 id="h-breath">Дыхательное упражнение</h2>
+      <h2 id="h-breath" class="card-title">${icon('Wind', 22)}Дыхательное упражнение</h2>
       <!-- TODO: сверить с источником [предостережение «если неприятно или кружится голова — остановитесь» добавлено разработчиком] -->
       <p>Медленное дыхание в заданном темпе: следите за кругом — он растёт на вдохе и уменьшается на выдохе.
         Дышите спокойно, без усилия. Если неприятно или кружится голова — остановитесь.</p>
@@ -56,7 +57,7 @@ export function renderRegulation(root) {
       <div class="card card-important">
         <p>Хотите узнать, есть ли разница именно для вас? Проверьте это в самоэксперименте:
           сайт случайно распределит дни «с упражнением» и «без», а потом сравнит их.</p>
-        <a class="btn" id="check-breathing" href="#">Проверить, помогает ли это мне</a>
+        <a class="btn" id="check-breathing" href="#">${icon('Shuffle', 18)}Проверить, помогает ли это мне</a>
       </div>
     </section>
 
@@ -77,7 +78,7 @@ export function renderRegulation(root) {
           </ul>
         </section>`).join('')}
       <div class="actions">
-        <a class="btn" href="#/experiments/new">Выбрать совет и проверить его на себе</a>
+        <a class="btn btn-ghost" href="#/experiments/new">${icon('Shuffle', 18)}Выбрать совет и проверить его на себе</a>
       </div>
     </section>`;
 

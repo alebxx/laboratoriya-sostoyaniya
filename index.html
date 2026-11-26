@@ -21,7 +21,7 @@
 
     <header class="site-header">
       <div class="header-row">
-        <a class="logo" href="#/">Лаборатория состояния</a>
+        <a class="logo" href="#/"><span id="logo-icon"></span>Лаборатория состояния</a>
         <button type="button" class="btn btn-ghost" id="theme-toggle" aria-label="Сменить тему оформления">Тема</button>
         <button type="button" class="btn btn-ghost menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="main-nav">Меню</button>
       </div>
@@ -42,9 +42,13 @@
       </nav>
     </header>
 
+    <div id="offline-banner" class="offline-banner" hidden role="status">
+      <p><span id="offline-mascot"></span><span>Нет подключения к интернету. Сайт работает и без него: все записи сохраняются в этом браузере.</span></p>
+    </div>
+
     <div id="demo-banner" class="demo-banner" hidden>
-      <p>Сейчас в базе есть <strong>демо-данные</strong> — это выдуманный пример.
-        <a href="#/settings">Удалить их можно в настройках</a>.</p>
+      <p><span>Сейчас в базе есть <strong>демо-данные</strong> — это выдуманный пример.
+        <a href="#/settings">Удалить их можно в настройках</a>.</span></p>
     </div>
 
     <main id="app" tabindex="-1"></main>

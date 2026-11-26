@@ -16,6 +16,8 @@ import { PVT_INSTRUCTION, PVT_PREPARATION } from '../data/pvtTexts.js';
 import { DEVICE_TYPES } from './onboarding.js';
 import { sliderHtml, setupSliders, readSlider } from '../ui/fields.js';
 import { escapeHtml, formatDateTime } from '../ui/helpers.js';
+import { icon } from '../ui/icons.js';
+import { getTheme, effectiveTheme } from '../ui/layout.js';
 
 const DEVICE_NAMES = { phone: 'телефон', tablet: 'планшет', computer: 'компьютер' };
 
@@ -44,7 +46,7 @@ export async function renderPvt(root) {
     const usualTime = usualStartTime(sessions);
 
     root.innerHTML = `
-      <h1>Тест внимания</h1>
+      <h1 class="card-title metric-test" style="font-size:1.85rem"><span class="metric-badge">${icon('Timer', 22)}</span>Тест внимания</h1>
       <p class="lead">Трёхминутный тест на время реакции (вариант PVT-B). Он измеряет, насколько быстро и стабильно вы реагируете на сигнал, — это показатель бдительности, а не стресса.</p>
 
       ${practice ? `
@@ -53,12 +55,12 @@ export async function renderPvt(root) {
           Поэтому тренировочные сеансы не входят в анализ.</p>` : ''}
 
       <section class="card" aria-labelledby="h-how">
-        <h2 id="h-how">Как проходить</h2>
+        <h2 id="h-how" class="card-title">${icon('Info', 20)}Как проходить</h2>
         <ul>${PVT_INSTRUCTION.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
       </section>
 
       <section class="card" aria-labelledby="h-prep">
-        <h2 id="h-prep">Перед началом</h2>
+        <h2 id="h-prep" class="card-title">${icon('Lightbulb', 20)}Перед началом</h2>
         <ul>${PVT_PREPARATION.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
         ${usualTime ? `<p class="hint">Раньше вы обычно проходили тест около <strong>${usualTime}</strong>.</p>` : ''}
       </section>
@@ -76,7 +78,7 @@ export async function renderPvt(root) {
         </fieldset>
         <div id="device-warning" role="status"></div>
         <div class="actions">
-          <button type="submit" class="btn btn-primary">Начать тест (${Math.round(PVT.durationSec / 60)} мин)</button>
+          <button type="submit" class="btn btn-primary">${icon('Timer', 18)}Начать тест (${Math.round(PVT.durationSec / 60)} мин)</button>
         </div>
       </form>
 
@@ -130,6 +132,9 @@ export async function renderPvt(root) {
       device: { type: deviceType, isPrimary: deviceType === primary.type, userAgent: navigator.userAgent },
       config: { ...PVT },
       screen: { width: screen.width, height: screen.height, pixelRatio: window.devicePixelRatio },
+      // Тема сайта в момент теста. Сам экран теста одинаков в обеих темах,
+      // но тему записываем, чтобы при анализе можно было это проверить.
+      theme: { setting: getTheme(), shown: effectiveTheme() },
     };
     await put('pvtSessions', session);
 

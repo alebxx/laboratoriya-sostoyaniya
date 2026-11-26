@@ -9,6 +9,7 @@ import { canTake, changeFromPrevious, scoreRanges } from '../logic/pss.js';
 import { dayKeyFor } from '../logic/dates.js';
 import { pssFormHtml, setupPssForm } from '../ui/pssForm.js';
 import { formatDateTime } from '../ui/helpers.js';
+import { icon } from '../ui/icons.js';
 
 // Что именно измеряет шкала — TODO: вставить из источника [Cohen, Kamarck, Mermelstein, 1983;
 // описание из выбранной русской версии]. Пока — нейтральное описание без научных утверждений.
@@ -32,7 +33,7 @@ export async function renderPss(root) {
   const status = canTake(results, dayKeyFor());
 
   root.innerHTML = `
-    <h1>PSS-10: шкала воспринимаемого стресса</h1>
+    <h1 class="card-title metric-pss" style="font-size:1.85rem"><span class="metric-badge">${icon('ClipboardCheck', 22)}</span>PSS-10: шкала воспринимаемого стресса</h1>
     <section class="card card-important"><p>${NOT_DIAGNOSIS}</p></section>
     <div id="pss-area"></div>
     ${historyHtml(results)}`;

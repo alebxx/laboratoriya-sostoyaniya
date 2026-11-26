@@ -10,6 +10,9 @@ import { allMetrics, dailyValues, periodRange, listDays, inPeriod, pairByDay } f
 import { EXCLUSION_LABELS } from '../logic/sessionFilter.js';
 import { Chart, themeColors, shortDay, axis, baseOptions } from '../ui/charts.js';
 import { escapeHtml } from '../ui/helpers.js';
+import { icon } from '../ui/icons.js';
+import { mascot } from '../ui/mascot.js';
+import { metricStyle, metricClass, metricColor, metricGroup } from '../ui/metricStyle.js';
 
 // Выбор пользователя сохраняется, пока открыта вкладка.
 const state = {
@@ -128,7 +131,7 @@ export async function renderCharts(root) {
     const area = root.querySelector('#charts-area');
     area.innerHTML = `
       <h2>Показатели во времени</h2>
-      ${withData.length === 0 ? '<p class="notice">Данных пока нет. Заполните дневник или пройдите тест — и здесь появятся графики.</p>' : ''}
+      ${withData.length === 0 ? `<div class="card empty-state">${mascot('notebook', { size: 110 })}<p>Данных пока нет. Заполните дневник или пройдите тест — и здесь появятся графики.</p></div>` : ''}
       <div class="chart-grid">
         ${withData.map((s, i) => {
           const pts = inPeriod(s.points, range);
@@ -171,7 +174,7 @@ export async function renderCharts(root) {
           ? 'У показателей разные шкалы: левая ось — A (сплошная линия), правая — B (пунктир). Сравнивайте, совпадают ли подъёмы и спады по дням, а не высоту линий: она зависит от выбранных шкал.'
           : 'Каждая точка — один день: по горизонтали значение A, по вертикали — B.'}
         Исключённые сеансы теста здесь не показываются.</p>
-      ${pairs.length < ANALYSIS.minPointsForConclusions ? `<p class="notice">Данных пока мало для выводов (меньше ${ANALYSIS.minPointsForConclusions} дней с обоими показателями).</p>` : ''}
+      ${pairs.length < ANALYSIS.minPointsForConclusions ? `<div class="notice with-mascot">${mascot('sprouts', { size: 44 })}<div>Данных пока мало для выводов (меньше ${ANALYSIS.minPointsForConclusions} дней с обоими показателями).</div></div>` : ''}
       ${tableHtml(['День', `A: ${a.metric.label}`, `B: ${b.metric.label}`], pairs.map((p) => [p.day, p.a, p.b]))}`;
 
     const canvas = area.querySelector('#compare-chart');
@@ -198,12 +201,12 @@ function selectHtml(id, label, metrics, selected) {
 function chartCardHtml(i, metric, points, excluded) {
   const few = points.length < ANALYSIS.minPointsForConclusions;
   return `
-    <section class="card chart-card" aria-labelledby="ct-${i}">
-      <h3 id="ct-${i}">${escapeHtml(metric.label)}</h3>
+    <section class="card chart-card card-metric ${metricClass(metric.key)}" aria-labelledby="ct-${i}">
+      <h3 id="ct-${i}" class="card-title"><span class="metric-badge">${icon(metricStyle(metric.key).icon, 20)}</span>${escapeHtml(metric.label)}</h3>
       <div class="chart-box"><canvas id="chart-${i}" role="img"
         aria-label="${escapeHtml(`График «${metric.label}»: ${points.length} точек за период`)}"></canvas></div>
       <p class="hint">Точек данных за период: <strong>${points.length}</strong>${excluded.length ? `; исключённых сеансов (в счёт не входят): ${excluded.length}` : ''}.</p>
-      ${few ? `<p class="notice notice-small">Данных пока мало для выводов (меньше ${ANALYSIS.minPointsForConclusions} точек).</p>` : ''}
+      ${few ? `<div class="notice notice-small with-mascot">${mascot('sprouts', { size: 44 })}<div>Данных пока мало для выводов (меньше ${ANALYSIS.minPointsForConclusions} точек). Наблюдения растут с каждым днём.</div></div>` : ''}
       ${tableHtml(['День', 'Значение', 'Примечание'], [
         ...points.map((p) => [p.day, p.value, '']),
         ...excluded.map((p) => [p.day, p.value, `исключён: ${REASON_LABELS[p.reason] || p.reason}`]),
@@ -266,9 +269,9 @@ function timeChart(canvas, metric, points, excluded, days, colors) {
   const datasets = [{
     label: metric.label,
     data: days.map((d) => (byDay.has(d) ? byDay.get(d) : null)),
-    borderColor: colors.series1,
-    backgroundColor: colors.series1,
-    borderWidth: 2,
+    borderColor: metricColor(metric.key),
+    backgroundColor: metricColor(metric.key),
+    borderWidth: colors.line,
     pointRadius: 4,
     pointHoverRadius: 6,
     spanGaps: true,
@@ -303,6 +306,10 @@ function timeChart(canvas, metric, points, excluded, days, colors) {
 function overlayChart(canvas, ma, mb, ptsA, ptsB, days, colors) {
   const mapA = new Map(ptsA.map((p) => [p.day, p.value]));
   const mapB = new Map(ptsB.map((p) => [p.day, p.value]));
+  // Цвет каждого показателя — его постоянный цвет. Если у A и B цвет общий
+  // (например, два своих фактора), B рисуется приглушённым цветом.
+  const colorA = metricColor(ma.key);
+  const colorB = metricGroup(ma.key) === metricGroup(mb.key) ? colors.muted : metricColor(mb.key);
   const options = baseOptions(colors);
   options.interaction = { mode: 'index', intersect: false };
   options.plugins.tooltip.callbacks = { title: tooltipTitle };
@@ -316,9 +323,9 @@ function overlayChart(canvas, ma, mb, ptsA, ptsB, days, colors) {
     data: {
       labels: days,
       datasets: [
-        { label: `A: ${ma.label}`, data: days.map((d) => mapA.get(d) ?? null), yAxisID: 'yA', borderColor: colors.series1, backgroundColor: colors.series1, borderWidth: 2, pointRadius: 4, spanGaps: true },
+        { label: `A: ${ma.label}`, data: days.map((d) => mapA.get(d) ?? null), yAxisID: 'yA', borderColor: colorA, backgroundColor: colorA, borderWidth: colors.line, pointRadius: 4, spanGaps: true },
         // B — пунктир и квадратные точки: различимо не только по цвету.
-        { label: `B: ${mb.label}`, data: days.map((d) => mapB.get(d) ?? null), yAxisID: 'yB', borderColor: colors.series2, backgroundColor: colors.series2, borderWidth: 2, borderDash: [6, 4], pointStyle: 'rect', pointRadius: 4, spanGaps: true },
+        { label: `B: ${mb.label}`, data: days.map((d) => mapB.get(d) ?? null), yAxisID: 'yB', borderColor: colorB, backgroundColor: colorB, borderWidth: colors.line, borderDash: [6, 4], pointStyle: 'rect', pointRadius: 4, spanGaps: true },
       ],
     },
     options,
@@ -340,7 +347,7 @@ function scatterChart(canvas, ma, mb, pairs, colors) {
   };
   return new Chart(canvas, {
     type: 'scatter',
-    data: { datasets: [{ label: 'Дни', data: pairs.map((p) => ({ x: p.a, y: p.b, day: p.day })), backgroundColor: colors.series1, borderColor: colors.surface, borderWidth: 2, pointRadius: 6, pointHoverRadius: 8 }] },
+    data: { datasets: [{ label: 'Дни', data: pairs.map((p) => ({ x: p.a, y: p.b, day: p.day })), backgroundColor: metricColor(mb.key), borderColor: colors.surface, borderWidth: 2, pointRadius: 6, pointHoverRadius: 8 }] },
     options,
   });
 }

@@ -12,12 +12,14 @@ import { conditionForDay, isFinished, lastDay } from '../logic/alternation.js';
 import { dayKeyFor } from '../logic/dates.js';
 import { EXPLORE_INTRO, CHECK_INTRO } from '../data/hypothesisTexts.js';
 import { escapeHtml, formatDateTime } from '../ui/helpers.js';
+import { icon, STEP_ICONS } from '../ui/icons.js';
+import { mascot } from '../ui/mascot.js';
 import { getParam } from '../router.js';
 
 const TABS = [
-  ['explore', 'Исследую'],
-  ['check', 'Проверяю'],
-  ['experiment', 'Самоэксперимент'],
+  ['explore', 'Исследую', 'Search'],
+  ['check', 'Проверяю', 'Lock'],
+  ['experiment', 'Самоэксперимент', 'Shuffle'],
 ];
 
 export async function renderHypotheses(root) {
@@ -26,7 +28,7 @@ export async function renderHypotheses(root) {
   root.innerHTML = `
     <h1>Гипотезы</h1>
     <nav class="tabs" aria-label="Режимы">
-      ${TABS.map(([t, label]) => `<a class="tab tab-${t}" href="#/hypotheses?tab=${t}" ${t === tab ? 'aria-current="page"' : ''}>${label}</a>`).join('')}
+      ${TABS.map(([t, label, ic]) => `<a class="tab tab-${t}" href="#/hypotheses?tab=${t}" ${t === tab ? 'aria-current="page"' : ''}>${icon(ic, 18)}${label}</a>`).join('')}
     </nav>
     <div id="tab-content"></div>`;
 
@@ -40,13 +42,13 @@ export async function renderHypotheses(root) {
 function renderExplore(el) {
   el.innerHTML = `
     <section class="mode mode-explore" aria-labelledby="h-explore">
-      <h2 id="h-explore">Режим «Исследую»</h2>
+      <div class="with-mascot">${mascot('magnifier', { size: 84 })}<div><h2 id="h-explore" style="margin:0">Режим «Исследую»</h2></div></div>
       <p class="notice"><strong>Здесь можно искать идеи для гипотез.</strong> Найденные совпадения — не выводы:
         если перебирать много показателей, случайные «связи» найдутся обязательно.</p>
       <p>${EXPLORE_INTRO}</p>
       <div class="actions">
         <a class="btn btn-primary" href="#/charts">Открыть графики и сравнение показателей</a>
-        <a class="btn" href="#/hypotheses?tab=check">Перейти к проверке гипотезы</a>
+        <a class="btn btn-ghost" href="#/hypotheses?tab=check">Перейти к проверке гипотезы</a>
       </div>
     </section>`;
 }
@@ -64,13 +66,13 @@ async function renderCheck(el) {
       <h2 id="h-check">Режим «Проверяю»</h2>
       <p>${CHECK_INTRO}</p>
       <ol class="steps-inline">
-        <li>Вопрос</li><li>План</li><li>Фиксация</li><li>Наблюдение</li><li>Рассуждение</li>
+        ${['Вопрос', 'План', 'Фиксация', 'Наблюдение', 'Рассуждение'].map((n, i) => `<li>${icon(STEP_ICONS[i], 16)}${n}</li>`).join('')}
       </ol>
-      <div class="actions"><a class="btn btn-primary" href="#/hypotheses/new">Новая гипотеза</a></div>
+      <div class="actions"><a class="btn btn-primary" href="#/hypotheses/new">${icon('Plus', 18)}Новая гипотеза</a></div>
     </section>
 
     <h2>Мои гипотезы</h2>
-    ${hypotheses.length === 0 ? '<p class="hint">Гипотез пока нет.</p>' : `
+    ${hypotheses.length === 0 ? `<div class="empty-state">${mascot('notebook', { size: 100 })}<p>Гипотез пока нет. Начните с вопроса, который вам интересен.</p></div>` : `
       <ul class="item-list">
         ${hypotheses.map((h) => {
           const factor = ctx.metrics.find((m) => m.key === h.plan.factorKey);
@@ -107,11 +109,11 @@ async function renderExperiments(el) {
       <p>Вы задаёте два условия, например «перерыв 10 минут перед тестом» и «без перерыва».
         Сайт случайно распределяет дни между ними и каждый день напоминает, какое условие сегодня.
         В конце дни A и B сравниваются тем же способом, что и в гипотезах.</p>
-      <div class="actions"><a class="btn btn-primary" href="#/experiments/new">Новый самоэксперимент</a></div>
+      <div class="actions"><a class="btn btn-primary" href="#/experiments/new">${icon('Plus', 18)}Новый самоэксперимент</a></div>
     </section>
 
     <h2>Мои самоэксперименты</h2>
-    ${experiments.length === 0 ? '<p class="hint">Самоэкспериментов пока нет.</p>' : `
+    ${experiments.length === 0 ? `<div class="empty-state">${mascot('notebook', { size: 100 })}<p>Самоэкспериментов пока нет.</p></div>` : `
       <ul class="item-list">
         ${experiments.map((e) => {
           const cond = conditionForDay(e, today);

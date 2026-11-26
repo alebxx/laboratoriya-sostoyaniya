@@ -1,6 +1,5 @@
 // Страница-образец оформления: обе темы рядом.
 import '@fontsource-variable/nunito';
-import '@fontsource-variable/manrope';
 import '../src/styles/tokens.css';
 import './sample.css';
 import {
@@ -43,17 +42,14 @@ function greeting(date = new Date()) {
 }
 
 // ----- Шрифты -----
-document.getElementById('font-compare').innerHTML = [
-  ['Nunito', 'var(--font)', 'Скруглённые буквы — мягко и «по-домашнему», хорошо читается кириллица. Рекомендую.', true],
-  ['Manrope', 'var(--font-alt)', 'Более строгий, «технический». Тоже отличная кириллица, но холоднее по настроению.', false],
-].map(([name, family, note, rec]) => `
-  <div class="font-card ${rec ? 'is-recommended' : ''}" style="font-family:${family}">
-    <strong>${name}${rec ? ' — рекомендую' : ''}</strong>
+document.getElementById('font-compare').innerHTML = `
+  <div class="font-card is-recommended" style="font-family:var(--font)">
+    <strong>Nunito — шрифт сайта</strong>
     <p class="big">Лаборатория состояния</p>
     <p>Съешь же ещё этих мягких французских булок, да выпей чаю. Ёлка, щётка, «цитаты» — 0123456789 мс.</p>
     <p style="font-weight:400">Обычный 400 · <span style="font-weight:600">полужирный 600</span> · <span style="font-weight:800">жирный 800</span></p>
-    <p style="font-size:.85rem;opacity:.8">${note} Лицензия SIL Open Font License 1.1, файлы лежат в проекте.</p>
-  </div>`).join('');
+    <p style="font-size:.85rem;opacity:.8">Лицензия SIL Open Font License 1.1, файлы лежат в проекте.</p>
+  </div>`;
 
 // ----- Содержимое колонки темы -----
 function column(theme) {

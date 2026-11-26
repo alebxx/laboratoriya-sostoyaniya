@@ -12,7 +12,6 @@
     "contrast": "node scripts/check-contrast.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/manrope": "^5.3.0",
     "@fontsource-variable/nunito": "^5.3.0",
     "chart.js": "^4.6.2",
     "idb": "^8.0.4",

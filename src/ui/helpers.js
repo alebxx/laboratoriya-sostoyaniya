@@ -2,6 +2,8 @@
 // Мелкие помощники для страниц.
 // =====================================================================
 
+import { icon } from './icons.js';
+
 // Защита текста пользователя при вставке в HTML.
 // Без неё заметка вида «<b>» сломала бы страницу.
 export function escapeHtml(text) {
@@ -44,4 +46,19 @@ export function formatDateTime(iso) {
 // Сегодняшняя дата для имени файла: 2026-11-26.
 export function fileDate(date = new Date()) {
   return date.toISOString().slice(0, 10);
+}
+
+// Содержимое сообщения «Сохранено»: галочка и текст.
+export function statusInner(text) {
+  return text ? `${icon('Check', 20)}<span>${escapeHtml(text)}</span>` : '';
+}
+
+// Показать сообщение о результате действия с маленькой анимацией галочки
+// (анимация отключается при настройке «уменьшить движение»).
+export function showStatus(el, text) {
+  if (!el) return;
+  el.innerHTML = statusInner(text);
+  el.classList.remove('pop');
+  void el.offsetWidth; // перезапуск анимации
+  el.classList.add('pop');
 }

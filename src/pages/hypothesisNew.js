@@ -11,6 +11,8 @@ import { makeId } from '../logic/id.js';
 import { ANALYSIS } from '../config.js';
 import { WHY_LOCK, WHY_ONCE } from '../data/hypothesisTexts.js';
 import { escapeHtml } from '../ui/helpers.js';
+import { icon, STEP_ICONS } from '../ui/icons.js';
+import { mascot } from '../ui/mascot.js';
 import { getParam } from '../router.js';
 
 const SOURCE_GROUPS = [
@@ -53,7 +55,7 @@ export async function renderHypothesisNew(root) {
   function stepsHtml() {
     const names = ['Вопрос', 'План', 'Фиксация', 'Наблюдение', 'Рассуждение'];
     return `<ol class="steps" aria-label="Шаги проверки">
-      ${names.map((n, i) => `<li class="${i + 1 === w.step ? 'is-current' : i + 1 < w.step ? 'is-done' : ''}" ${i + 1 === w.step ? 'aria-current="step"' : ''}>${i + 1}. ${n}</li>`).join('')}
+      ${names.map((n, i) => `<li class="${i + 1 === w.step ? 'is-current' : i + 1 < w.step ? 'is-done' : ''}" ${i + 1 === w.step ? 'aria-current="step"' : ''}>${icon(i + 1 < w.step ? 'Check' : STEP_ICONS[i], 16)}${i + 1}. ${n}</li>`).join('')}
     </ol>`;
   }
 
@@ -210,7 +212,7 @@ export async function renderHypothesisNew(root) {
         </dl>
       </section>
       <section class="card card-important">
-        <h2>Зачем фиксировать</h2>
+        <div class="with-mascot">${mascot('lock', { size: 80 })}<div><h2 style="margin:0">Зачем фиксировать</h2></div></div>
         <ul>${WHY_LOCK.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
         <p>${escapeHtml(WHY_ONCE)}</p>
         <label class="check-row">
@@ -220,7 +222,7 @@ export async function renderHypothesisNew(root) {
       </section>
       <div class="actions">
         <button type="button" class="btn btn-ghost" id="back">Назад</button>
-        <button type="button" class="btn btn-primary" id="lock" disabled>Зафиксировать гипотезу</button>
+        <button type="button" class="btn btn-primary" id="lock" disabled>${icon('Lock', 18)}Зафиксировать гипотезу</button>
       </div>`;
     const lockBtn = root.querySelector('#lock');
     root.querySelector('#agree').addEventListener('change', (e) => { lockBtn.disabled = !e.target.checked; });

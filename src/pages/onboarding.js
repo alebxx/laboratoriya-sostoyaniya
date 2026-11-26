@@ -6,6 +6,8 @@ import { setSetting } from '../db/repo.js';
 import { NOT_MEDICAL, PRIVACY, STORAGE_WARNING, CORRELATION_NOTE } from '../data/texts.js';
 import { MIN_AGE } from '../config.js';
 import { escapeHtml } from '../ui/helpers.js';
+import { mascot } from '../ui/mascot.js';
+import { icon } from '../ui/icons.js';
 
 export const DEVICE_TYPES = [
   { value: 'phone', label: 'Телефон' },
@@ -20,11 +22,16 @@ export function renderOnboarding(root) {
   // ----- Шаг 1. Что это за сайт -----
   function step1() {
     root.innerHTML = `
-      <h1>Добро пожаловать в «Лабораторию состояния»</h1>
-      <p class="step-label">Шаг 1 из 3</p>
+      <div class="with-mascot">
+        ${mascot('greet', { size: 110 })}
+        <div>
+          <p class="step-label">Шаг 1 из 3</p>
+          <h1 style="margin-top:0">Добро пожаловать в «Лабораторию состояния»</h1>
+        </div>
+      </div>
 
       <section class="card">
-        <h2>Что делает сайт</h2>
+        <h2 class="card-title">${icon('FlaskConical', 22)}Что делает сайт</h2>
         <ul>
           <li>Помогает вести короткий дневник: стресс, усталость, сон, настроение.</li>
           <li>Предлагает трёхминутный тест на внимание (время реакции).</li>
@@ -34,19 +41,22 @@ export function renderOnboarding(root) {
       </section>
 
       <section class="card card-important">
-        <h2>Чего сайт не делает</h2>
+        <h2 class="card-title">${icon('Info', 22)}Чего сайт не делает</h2>
         <p>${NOT_MEDICAL}</p>
         <p>${CORRELATION_NOTE}</p>
       </section>
 
-      <section class="card">
-        <h2>Где хранятся данные</h2>
-        <p>${PRIVACY}</p>
-        <p>В разделе «Настройки и данные» можно в любой момент выгрузить все записи в файл (CSV или JSON) и полностью удалить их.</p>
+      <section class="card with-mascot">
+        ${mascot('lock', { size: 84 })}
+        <div>
+          <h2 style="margin-top:0">Где хранятся данные</h2>
+          <p>${PRIVACY}</p>
+          <p>В разделе «Настройки и данные» можно в любой момент выгрузить все записи в файл (CSV или JSON) и полностью удалить их.</p>
+        </div>
       </section>
 
       <section class="card card-warning">
-        <h2>Чтобы данные не потерялись</h2>
+        <h2 class="card-title">${icon('Download', 22)}Чтобы данные не потерялись</h2>
         <p>${STORAGE_WARNING}</p>
       </section>
 

@@ -5,8 +5,9 @@ import { getAllSettings, setSetting, clearEverything, getAllData, deleteDemoData
 import { generateCode, isValidCode, hasDemoData, PILOT_DEFAULT_AFTER_DAYS } from '../logic/pilot.js';
 import { loadDemoData } from '../db/demoLoader.js';
 import { exportAllData, exportStoreCsv, importAllData, CSV_TABLES } from '../db/exportImport.js';
-import { getTheme, setTheme } from '../ui/layout.js';
-import { downloadFile, formatDateTime, fileDate, escapeHtml } from '../ui/helpers.js';
+import { setTheme, themePickerHtml, setupThemePicker } from '../ui/layout.js';
+import { icon } from '../ui/icons.js';
+import { downloadFile, formatDateTime, fileDate, escapeHtml, showStatus } from '../ui/helpers.js';
 import { DEVICE_TYPES } from './onboarding.js';
 import { MIN_AGE } from '../config.js';
 import { rerender } from '../router.js';
@@ -14,7 +15,6 @@ import { rerender } from '../router.js';
 export async function renderSettings(root) {
   const s = await getAllSettings();
   const device = s.primaryDevice || {};
-  const theme = getTheme();
   const pilot = s.pilot || null;
   const demoPresent = hasDemoData(await getAllData());
 
@@ -23,23 +23,9 @@ export async function renderSettings(root) {
     <p role="status" id="status" class="status"></p>
 
     <section class="card" aria-labelledby="h-theme">
-      <h2 id="h-theme">Оформление</h2>
-      <fieldset>
-        <legend>Тема</legend>
-        <div class="radio-row">
-          ${[
-            ['system', 'Как в системе'],
-            ['light', 'Светлая'],
-            ['dark', 'Тёмная'],
-          ]
-            .map(
-              ([v, l]) => `<label class="radio-card">
-                <input type="radio" name="theme" value="${v}" ${theme === v ? 'checked' : ''} /><span>${l}</span>
-              </label>`
-            )
-            .join('')}
-        </div>
-      </fieldset>
+      <h2 id="h-theme" class="card-title">${icon('SunMoon', 22)}Оформление</h2>
+      ${themePickerHtml('theme')}
+      <p class="hint">Экран теста внимания выглядит одинаково в обеих темах, чтобы тема не влияла на время реакции.</p>
     </section>
 
     <section class="card" aria-labelledby="h-device">
@@ -80,7 +66,7 @@ export async function renderSettings(root) {
       <h3>Резервная копия (JSON)</h3>
       <p>Полная копия всех данных — для восстановления через «Загрузку из копии» на этом или другом устройстве.
          Этот файл предназначен для программы, а не для чтения: внутри он выглядит как код со скобками и кавычками. Так и должно быть.</p>
-      <button type="button" class="btn btn-primary" id="export-json">Скачать резервную копию (JSON)</button>
+      <button type="button" class="btn btn-primary" id="export-json">${icon('Download', 18)}Скачать резервную копию (JSON)</button>
 
       <h3>Таблицы для просмотра (CSV)</h3>
       <p>Чтобы посмотреть свои данные в виде таблицы. Каждая таблица — отдельный файл.
@@ -118,7 +104,7 @@ export async function renderSettings(root) {
       ${pilot?.enabled ? `
         <p>Режим пилота включён. Код участника: <strong class="code">${escapeHtml(pilot.code)}</strong>, начало ${formatDateTime(pilot.startedAt)}.</p>
         <div class="actions">
-          <a class="btn btn-primary" href="#/pilot">Открыть страницу пилота</a>
+          <a class="btn" href="#/pilot">Открыть страницу пилота</a>
           <button type="button" class="btn btn-ghost" id="pilot-off">Выключить режим пилота</button>
         </div>` : `
         <p>Включайте, только если вы участвуете в пилотном исследовании. Вместо имени будет использоваться код участника,
@@ -138,7 +124,7 @@ export async function renderSettings(root) {
               <input type="number" id="pilot-days" min="3" max="90" step="1" value="${PILOT_DEFAULT_AFTER_DAYS}" />
             </label>
             <div id="pilot-errors" role="alert"></div>
-            <button type="submit" class="btn btn-primary">Включить режим пилота</button>
+            <button type="submit" class="btn">Включить режим пилота</button>
           </form>`}`}
     </section>
 
@@ -150,13 +136,16 @@ export async function renderSettings(root) {
 
   const status = root.querySelector('#status');
   const say = (text) => {
+    showStatus(status, text);
+  };
+  // Ошибки — без галочки (галочка означает «получилось»).
+  const sayError = (text) => {
+    status.classList.remove('pop');
     status.textContent = text;
   };
 
   // Тема
-  for (const input of root.querySelectorAll('input[name="theme"]')) {
-    input.addEventListener('change', () => setTheme(input.value));
-  }
+  setupThemePicker(root, 'theme');
 
   // Устройство
   root.querySelector('#device-form').addEventListener('submit', async (e) => {
@@ -167,14 +156,14 @@ export async function renderSettings(root) {
     const name = String(form.get('deviceName') || '').trim();
     await setSetting('primaryDevice', { type, name: name || typeLabel, userAgent: navigator.userAgent });
     await rerender();
-    document.getElementById('status').textContent = 'Устройство сохранено.';
+    showStatus(document.getElementById('status'), 'Устройство сохранено.');
   });
 
   // Возраст
   root.querySelector('#age-toggle').addEventListener('click', async () => {
     await setSetting('age13plus', !s.age13plus);
     await rerender();
-    document.getElementById('status').textContent = 'Ответ о возрасте изменён.';
+    showStatus(document.getElementById('status'), 'Ответ о возрасте изменён.');
   });
 
   // Экспорт JSON
@@ -184,7 +173,7 @@ export async function renderSettings(root) {
     await setSetting('lastBackupAt', new Date().toISOString());
     await setSetting('backupSnoozedUntil', null);
     await rerender();
-    document.getElementById('status').textContent = 'Файл с копией данных скачан.';
+    showStatus(document.getElementById('status'), 'Файл с копией данных скачан.');
   });
 
   // Экспорт CSV
@@ -204,7 +193,7 @@ export async function renderSettings(root) {
     try {
       obj = JSON.parse(await file.text());
     } catch {
-      say('Не удалось прочитать файл: это не JSON.');
+      sayError('Не удалось прочитать файл: это не JSON.');
       e.target.value = '';
       return;
     }
@@ -216,9 +205,9 @@ export async function renderSettings(root) {
     if (result.ok) {
       say('Данные загружены.');
       await rerender();
-      document.getElementById('status').textContent = 'Данные загружены из файла.';
+      showStatus(document.getElementById('status'), 'Данные загружены из файла.');
     } else {
-      say(result.error);
+      sayError(result.error);
     }
     e.target.value = '';
   });
@@ -244,24 +233,24 @@ export async function renderSettings(root) {
     if (!confirm('Выключить режим пилота? Анкеты и данные сохранятся, но страница пилота скроется.')) return;
     await setSetting('pilot', { ...pilot, enabled: false });
     await rerender();
-    document.getElementById('status').textContent = 'Режим пилота выключен.';
+    showStatus(document.getElementById('status'), 'Режим пилота выключен.');
   });
   root.querySelector('#load-demo')?.addEventListener('click', async () => {
     const days = await loadDemoData();
     await rerender();
-    document.getElementById('status').textContent = `Демо-данные добавлены (дней дневника: ${days}). Посмотрите «Карту состояния» и «Гипотезы».`;
+    showStatus(document.getElementById('status'), `Демо-данные добавлены (дней дневника: ${days}). Посмотрите «Карту состояния» и «Гипотезы».`);
   });
   root.querySelector('#delete-demo-2')?.addEventListener('click', async () => {
     if (!confirm('Удалить все демо-данные? Ваши собственные записи останутся.')) return;
     const n = await deleteDemoData();
     await rerender();
-    document.getElementById('status').textContent = `Демо-данные удалены (записей: ${n}).`;
+    showStatus(document.getElementById('status'), `Демо-данные удалены (записей: ${n}).`);
   });
   root.querySelector('#delete-demo')?.addEventListener('click', async () => {
     if (!confirm('Удалить все демо-данные? Ваши собственные записи останутся.')) return;
     const n = await deleteDemoData();
     await rerender();
-    document.getElementById('status').textContent = `Демо-данные удалены (записей: ${n}).`;
+    showStatus(document.getElementById('status'), `Демо-данные удалены (записей: ${n}).`);
   });
 
   // Удаление

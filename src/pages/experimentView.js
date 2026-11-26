@@ -10,6 +10,7 @@ import { dayKeyFor } from '../logic/dates.js';
 import { HOW_PERMUTATION, EXPERIMENT_INFLUENCES } from '../data/hypothesisTexts.js';
 import { drawDotPlot } from '../ui/dotplot.js';
 import { escapeHtml, formatDateTime } from '../ui/helpers.js';
+import { mascot } from '../ui/mascot.js';
 import { getParam, rerender } from '../router.js';
 
 export async function renderExperimentView(root) {
@@ -90,7 +91,7 @@ export async function renderExperimentView(root) {
     const diffWord = r.diff > 0 ? 'выше' : r.diff < 0 ? 'ниже' : 'такая же';
     return `
       <section class="card" aria-labelledby="h-res">
-        <h2 id="h-res">Итог</h2>
+        <div class="with-mascot">${mascot('diploma', { size: 80 })}<div><h2 id="h-res" style="margin:0">Итог</h2></div></div>
         <p class="hint">Посчитан ${formatDateTime(exp.resultComputedAt)} и больше не пересчитывается.</p>
         <p class="verdict">${VERDICT_LABELS[r.verdict]}</p>
         <p>В дни A медиана показателя «${escapeHtml((outcome?.name || outcome?.label || '').toLowerCase())}» была ${diffWord}${r.diff !== 0 ? ` на ${fmt(Math.abs(r.diff))}` : ''}:
@@ -142,7 +143,7 @@ export async function renderExperimentView(root) {
       chart = drawDotPlot(root.querySelector('#dots'), [
         { label: `A: ${exp.conditionA}`, values: a, median: r.medianA },
         { label: `B: ${exp.conditionB}`, values: b, median: r.medianB },
-      ], outcome?.label || '');
+      ], outcome?.label || '', exp.outcomeKey);
     };
     draw();
     window.addEventListener('themechange', draw);

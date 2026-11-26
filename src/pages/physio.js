@@ -7,7 +7,9 @@ import { makeId } from '../logic/id.js';
 import { checkValues, buildRecord, POSTURES } from '../logic/physio.js';
 import { PHYSIO_INPUT_LIMITS as L } from '../config.js';
 import { PROTOCOL_SHORT, PROTOCOL_DETAILED } from '../data/physio.js';
-import { escapeHtml, formatDateTime } from '../ui/helpers.js';
+import { escapeHtml, formatDateTime, statusInner } from '../ui/helpers.js';
+import { icon } from '../ui/icons.js';
+import { mascot } from '../ui/mascot.js';
 import { rerender } from '../router.js';
 
 let flash = '';
@@ -25,13 +27,13 @@ export async function renderPhysio(root) {
   const records = (await getAll('physio')).sort((a, b) => b.measuredAt.localeCompare(a.measuredAt)).slice(0, 20);
 
   root.innerHTML = `
-    <h1>Пульс и давление</h1>
-    <p role="status" id="status" class="status">${escapeHtml(flash)}</p>
+    <h1 class="card-title metric-pulse" style="font-size:1.85rem"><span class="metric-badge">${icon('HeartPulse', 22)}</span>Пульс и давление</h1>
+    <p role="status" id="status" class="status ${flash ? 'pop' : ''}">${statusInner(flash)}</p>
     <p class="notice">Здесь можно записывать собственные измерения — это необязательно.
       Сайт <strong>не оценивает</strong> значения, не сравнивает их с нормами и не делает выводов о здоровье или стрессе.</p>
 
     <section class="card card-important" aria-labelledby="h-protocol">
-      <h2 id="h-protocol">Перед измерением</h2>
+      <h2 id="h-protocol" class="card-title">${icon('Info', 20)}Перед измерением</h2>
       <ul>${PROTOCOL_SHORT.map((t) => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
       <details class="table-details">
         <summary>Подробная инструкция</summary>
@@ -76,13 +78,13 @@ export async function renderPhysio(root) {
 
       <div id="errors" role="alert"></div>
       <div class="actions">
-        <button type="submit" class="btn btn-primary">Сохранить измерение</button>
+        <button type="submit" class="btn btn-primary">${icon('Check', 18)}Сохранить измерение</button>
       </div>
     </form>
 
     <section aria-labelledby="h-recent">
       <h2 id="h-recent">Последние измерения</h2>
-      ${records.length === 0 ? '<p class="hint">Измерений пока нет.</p>' : `
+      ${records.length === 0 ? `<div class="empty-state">${mascot('notebook', { size: 90 })}<p>Измерений пока нет.</p></div>` : `
         <ul class="recent-list">
           ${records.map((r) => `
             <li>

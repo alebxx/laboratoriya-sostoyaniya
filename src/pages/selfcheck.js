@@ -100,9 +100,9 @@ export async function renderSelfcheck(root) {
     // Нарисовать гистограмму цветами текущей темы.
     const draw = () => {
       const css = getComputedStyle(document.documentElement);
-      const color = css.getPropertyValue('--series-1').trim();
-      const text = css.getPropertyValue('--text-muted').trim();
-      const grid = css.getPropertyValue('--border').trim();
+      const color = css.getPropertyValue('--m-test').trim();
+      const text = css.getPropertyValue('--chart-label').trim();
+      const grid = css.getPropertyValue('--chart-grid').trim();
       return new Chart(root.querySelector('#hist'), {
         type: 'bar',
         data: { labels, datasets: [{ label: 'Число реакций', data: counts, backgroundColor: color, borderRadius: 4 }] },

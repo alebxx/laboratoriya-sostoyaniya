@@ -3,6 +3,7 @@
 // горизонтальная черта — медиана группы.
 // =====================================================================
 import { Chart, themeColors, axis, baseOptions } from './charts.js';
+import { metricColor } from './metricStyle.js';
 
 // Небольшой сдвиг точек вбок, чтобы одинаковые значения не слипались.
 // Сдвиг не случайный, а по порядку — картинка каждый раз одинаковая.
@@ -12,9 +13,11 @@ function spread(i) {
 }
 
 // groups: [{ label, values, median }] — ровно две группы.
-export function drawDotPlot(canvas, groups, valueLabel) {
+// metricKey — показатель-результат: группа A рисуется его цветом (круги),
+// группа B — приглушённым цветом (квадраты). Цвет — не оценка, а «имя».
+export function drawDotPlot(canvas, groups, valueLabel, metricKey = 'other') {
   const colors = themeColors();
-  const palette = [colors.series1, colors.series2];
+  const palette = [metricColor(metricKey), colors.muted];
   const datasets = [];
   groups.forEach((g, gi) => {
     // Одинаковые значения раздвигаем: считаем, сколько раз значение уже встретилось.
