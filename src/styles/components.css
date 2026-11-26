@@ -763,3 +763,67 @@ tr.is-today {
 .pss-num {
   color: var(--text-muted);
 }
+
+/* ----- Дыхательное упражнение ----- */
+.breath-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 0;
+}
+
+.breath-circle {
+  width: min(220px, 60vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--important-bg);
+  border: 4px solid var(--series-1);
+  transform: scale(0.55);
+  transition-property: transform;
+  transition-timing-function: ease-in-out;
+  transition-duration: 1s;
+}
+
+.breath-circle.is-inhale {
+  transform: scale(1);
+}
+
+/* Для тех, у кого в системе включено «уменьшить движение», круг не меняет размер —
+   остаются подписи «Вдох / Выдох», секунды и полоска прогресса. */
+@media (prefers-reduced-motion: reduce) {
+  .breath-circle {
+    transition: none;
+    transform: scale(0.8);
+  }
+  .breath-circle.is-inhale {
+    transform: scale(0.8);
+  }
+}
+
+.breath-phase {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 8px 0 0;
+  min-height: 1.4em;
+  text-align: center;
+}
+
+.breath-seconds {
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+  min-height: 1.4em;
+}
+
+.breath-stage progress {
+  max-width: 260px;
+}
+
+.tips-list {
+  padding-left: 1.2em;
+}
+
+.tips-list p {
+  margin: 4px 0;
+}

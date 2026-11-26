@@ -19,7 +19,8 @@ import { renderExperimentNew } from './pages/experimentNew.js';
 import { renderExperimentView } from './pages/experimentView.js';
 import { renderPhysio } from './pages/physio.js';
 import { renderPss } from './pages/pss.js';
-import { placeholder } from './pages/placeholder.js';
+import { renderRegulation } from './pages/regulation.js';
+import { renderLearn } from './pages/learn.js';
 
 // Таблица «адрес → функция, которая рисует страницу».
 const routes = {
@@ -37,8 +38,8 @@ const routes = {
   '/experiments/view': renderExperimentView,
   '/physio': renderPhysio,
   '/pss': renderPss,
-  '/regulation': placeholder('Саморегуляция', 8),
-  '/learn': placeholder('Как это устроено', 8),
+  '/regulation': renderRegulation,
+  '/learn': renderLearn,
 };
 
 function currentPath() {
