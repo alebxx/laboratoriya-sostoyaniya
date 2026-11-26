@@ -2,13 +2,16 @@
 // Перевод таблицы (массива записей) в текст формата CSV.
 // CSV открывается в Excel, Google Таблицах, LibreOffice.
 // =====================================================================
-import { CSV_SEPARATOR } from '../config.js';
+import { CSV_SEPARATOR, CSV_DECIMAL } from '../config.js';
 
 // Подготовить одно значение для ячейки.
 export function formatCell(value, sep = CSV_SEPARATOR) {
   if (value === null || value === undefined) return '';
   let text;
-  if (typeof value === 'object') {
+  if (typeof value === 'number') {
+    // Дробные числа — с запятой: 6.5 → «6,5».
+    text = String(value).replace('.', CSV_DECIMAL);
+  } else if (typeof value === 'object') {
     // Списки и вложенные объекты записываем как JSON-текст.
     text = JSON.stringify(value);
   } else {

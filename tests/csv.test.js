@@ -11,6 +11,13 @@ describe('CSV', () => {
     expect(csv).toBe('day;stress\r\n2026-03-01;5\r\n2026-03-02;7');
   });
 
+  it('дробные числа — с запятой, целые — как есть', () => {
+    expect(formatCell(6.5)).toBe('6,5');
+    expect(formatCell(7)).toBe('7');
+    expect(formatCell(0)).toBe('0');
+    expect(rowsToCsv([{ a: 6.5, b: 'x' }])).toBe('a;b\r\n6,5;x');
+  });
+
   it('пустые значения — пустая ячейка', () => {
     expect(formatCell(null)).toBe('');
     expect(formatCell(undefined)).toBe('');
