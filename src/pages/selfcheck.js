@@ -97,26 +97,39 @@ export async function renderSelfcheck(root) {
 
   if (rts.length > 0) {
     const { labels, counts } = histogram(rts);
-    const css = getComputedStyle(document.documentElement);
-    const accent = css.getPropertyValue('--accent').trim();
-    const text = css.getPropertyValue('--text-muted').trim();
-    const grid = css.getPropertyValue('--border').trim();
-    const chart = new Chart(root.querySelector('#hist'), {
-      type: 'bar',
-      data: { labels, datasets: [{ label: 'Число реакций', data: counts, backgroundColor: accent }] },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { title: { display: true, text: 'Время реакции, мс', color: text }, ticks: { color: text }, grid: { color: grid } },
-          y: { title: { display: true, text: 'Число реакций', color: text }, ticks: { color: text, precision: 0 }, grid: { color: grid }, beginAtZero: true },
+    // Нарисовать гистограмму цветами текущей темы.
+    const draw = () => {
+      const css = getComputedStyle(document.documentElement);
+      const color = css.getPropertyValue('--series-1').trim();
+      const text = css.getPropertyValue('--text-muted').trim();
+      const grid = css.getPropertyValue('--border').trim();
+      return new Chart(root.querySelector('#hist'), {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Число реакций', data: counts, backgroundColor: color, borderRadius: 4 }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: 'Время реакции, мс', color: text }, ticks: { color: text }, grid: { color: grid } },
+            y: { title: { display: true, text: 'Число реакций', color: text }, ticks: { color: text, precision: 0 }, grid: { color: grid }, beginAtZero: true },
+          },
         },
-      },
-    });
-    // При уходе со страницы график удаляется.
-    return () => chart.destroy();
+      });
+    };
+    let chart = draw();
+    // Сменили тему — пересоздаём график новыми цветами.
+    const redraw = () => {
+      chart.destroy();
+      chart = draw();
+    };
+    window.addEventListener('themechange', redraw);
+    // При уходе со страницы всё убираем.
+    return () => {
+      window.removeEventListener('themechange', redraw);
+      chart.destroy();
+    };
   }
 }
 

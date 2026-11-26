@@ -11,6 +11,7 @@ import { renderSettings } from './pages/settings.js';
 import { renderDiary } from './pages/diary.js';
 import { renderPvt } from './pages/pvt.js';
 import { renderSelfcheck } from './pages/selfcheck.js';
+import { renderCharts } from './pages/charts.js';
 import { placeholder } from './pages/placeholder.js';
 
 // Таблица «адрес → функция, которая рисует страницу».
@@ -21,7 +22,7 @@ const routes = {
   '/diary': renderDiary,
   '/pvt': renderPvt,
   '/pvt-selfcheck': renderSelfcheck,
-  '/charts': placeholder('Карта состояния', 4),
+  '/charts': renderCharts,
   '/hypotheses': placeholder('Гипотезы', 5),
   '/physio': placeholder('Пульс и давление', 6),
   '/pss': placeholder('PSS-10', 7),

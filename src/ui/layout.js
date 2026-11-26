@@ -25,6 +25,8 @@ export function setTheme(theme) {
   if (theme === 'system') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = theme;
   updateThemeButton();
+  // Сообщаем страницам, что цвета поменялись (графики перерисуются).
+  window.dispatchEvent(new Event('themechange'));
 }
 
 function updateThemeButton() {
@@ -44,6 +46,10 @@ export function setupLayout() {
     setTheme(next);
   });
   updateThemeButton();
+  // Тема «как в системе»: если система переключилась на тёмную/светлую — тоже сообщаем.
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (getTheme() === 'system') window.dispatchEvent(new Event('themechange'));
+  });
 
   // Меню на телефоне открывается и закрывается кнопкой.
   const menuBtn = document.getElementById('menu-toggle');

@@ -22,6 +22,9 @@
   --danger: #a3261b;
   --danger-text: #ffffff;
   --radius: 10px;
+  /* Цвета линий графиков (проверены на различимость при дальтонизме). */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
 }
 
 /* Тёмная тема по настройке системы (если пользователь не выбрал светлую вручную). */
@@ -42,6 +45,8 @@
     --warning-border: #e0b04a;
     --danger: #ff8a7f;
     --danger-text: #1f0b09;
+    --series-1: #3987e5;
+    --series-2: #d95926;
   }
 }
 
@@ -62,4 +67,6 @@
   --warning-border: #e0b04a;
   --danger: #ff8a7f;
   --danger-text: #1f0b09;
+  --series-1: #3987e5;
+  --series-2: #d95926;
 }

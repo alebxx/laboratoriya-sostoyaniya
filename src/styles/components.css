@@ -523,3 +523,54 @@ td {
   padding: 8px;
   border-bottom: 1px solid var(--border);
 }
+
+/* ----- Карта состояния ----- */
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 22px;
+  height: 22px;
+  margin: 2px 0 0;
+  flex: none;
+  accent-color: var(--accent);
+}
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+  gap: 0 16px;
+}
+
+.chart-card h3 {
+  margin-top: 0;
+}
+
+.chart-box-tall {
+  height: 340px;
+}
+
+.notice-small {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+.table-details > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.compare-selects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 0 16px;
+}
