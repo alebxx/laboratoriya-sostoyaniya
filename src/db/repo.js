@@ -19,6 +19,15 @@ export async function put(store, record) {
   return (await getDb()).put(store, record);
 }
 
+// Сохранить сразу много записей одной транзакцией (быстрее и надёжнее:
+// либо сохранятся все, либо ни одной).
+export async function putMany(store, records) {
+  const db = await getDb();
+  const tx = db.transaction(store, 'readwrite');
+  for (const r of records) tx.store.put(r);
+  await tx.done;
+}
+
 // Удалить одну запись по ключу.
 export async function remove(store, key) {
   return (await getDb()).delete(store, key);

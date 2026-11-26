@@ -406,3 +406,120 @@ details.card > summary {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* ----- Тест внимания ----- */
+.pvt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+.pvt-abort {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+/* Рамка теста: большая зона касания, без выделения текста и прокрутки. */
+.pvt-frame {
+  width: min(560px, 100%);
+  height: min(320px, 50vh);
+  border: 4px solid var(--text-muted);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+.pvt-display {
+  font-size: clamp(2.5rem, 12vw, 5rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-height: 1.2em;
+}
+
+.pvt-display.is-stimulus {
+  color: var(--focus);
+}
+
+.pvt-display.is-feedback {
+  color: var(--text);
+  font-size: clamp(1.8rem, 8vw, 3rem);
+}
+
+.pvt-hint {
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Пока идёт тест, остальная страница не прокручивается. */
+body.pvt-running {
+  overflow: hidden;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-left: 4px;
+}
+
+/* Показатели сеанса */
+.metrics {
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.metrics dt {
+  font-weight: 600;
+}
+
+.metrics dd {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics .hint {
+  margin: 0;
+}
+
+/* Графики и таблицы */
+.chart-box {
+  position: relative;
+  height: 280px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}

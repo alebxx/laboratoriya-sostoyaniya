@@ -9,6 +9,8 @@ import { renderOnboarding } from './pages/onboarding.js';
 import { renderHome } from './pages/home.js';
 import { renderSettings } from './pages/settings.js';
 import { renderDiary } from './pages/diary.js';
+import { renderPvt } from './pages/pvt.js';
+import { renderSelfcheck } from './pages/selfcheck.js';
 import { placeholder } from './pages/placeholder.js';
 
 // Таблица «адрес → функция, которая рисует страницу».
@@ -17,7 +19,8 @@ const routes = {
   '/onboarding': renderOnboarding,
   '/settings': renderSettings,
   '/diary': renderDiary,
-  '/pvt': placeholder('Тест внимания', 3),
+  '/pvt': renderPvt,
+  '/pvt-selfcheck': renderSelfcheck,
   '/charts': placeholder('Карта состояния', 4),
   '/hypotheses': placeholder('Гипотезы', 5),
   '/physio': placeholder('Пульс и давление', 6),
@@ -40,6 +43,8 @@ export function getParam(name) {
   return new URLSearchParams(query).get(name);
 }
 
+let cleanup = null;
+
 async function render() {
   const path = currentPath();
 
@@ -51,10 +56,18 @@ async function render() {
   }
   document.body.classList.toggle('is-onboarding', path === '/onboarding');
 
+  // Если прошлая страница оставила «уборку» (например, остановить тест) — выполняем.
+  if (cleanup) {
+    cleanup();
+    cleanup = null;
+  }
+
   const page = routes[path] || notFound;
   const root = document.getElementById('app');
   root.innerHTML = '';
-  await page(root);
+  // Страница может вернуть функцию уборки — она выполнится при уходе со страницы.
+  const result = await page(root);
+  if (typeof result === 'function') cleanup = result;
 
   markCurrentNav(path);
   window.scrollTo(0, 0);

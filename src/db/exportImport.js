@@ -6,6 +6,8 @@ import { getDb, STORE_NAMES } from './db.js';
 import { rowsToCsv } from '../logic/csv.js';
 import { validateImport, migrateImport } from '../logic/importCheck.js';
 import { diaryRowsForCsv } from '../logic/diary.js';
+import { sessionRowsForCsv, trialRowsForCsv } from '../logic/pvt.js';
+import { exclusionReason } from '../logic/sessionFilter.js';
 
 // Какие таблицы выгружаются в CSV и как называются файлы.
 export const CSV_TABLES = [
@@ -40,6 +42,14 @@ export async function exportStoreCsv(store) {
     // Для дневника — понятные столбцы: каждый свой фактор отдельно.
     const factorsRow = await db.get('settings', 'customFactors');
     return rowsToCsv(diaryRowsForCsv(rows, factorsRow ? factorsRow.value : []));
+  }
+  if (store === 'pvtSessions') {
+    const primaryRow = await db.get('settings', 'primaryDevice');
+    const primaryType = primaryRow ? primaryRow.value.type : null;
+    return rowsToCsv(sessionRowsForCsv(rows, (s) => exclusionReason(s, primaryType)));
+  }
+  if (store === 'pvtTrials') {
+    return rowsToCsv(trialRowsForCsv(rows));
   }
   return rowsToCsv(rows);
 }
