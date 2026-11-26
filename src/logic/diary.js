@@ -107,30 +107,40 @@ export function validateFactor(name, type, existing) {
 
 // ----- Таблица CSV -----
 
-// Записи дневника → строки для CSV с понятными столбцами:
+// Время в виде «2026-11-26 20:36» по местному времени
+// (понятно человеку и правильно сортируется в таблице).
+export function localDateTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+// Записи дневника → строки для CSV с русскими заголовками столбцов:
 // причины — через запятую, каждый свой фактор — отдельный столбец.
+// (В JSON-копии названия полей остаются английскими — их читает программа.)
 export function diaryRowsForCsv(entries, factors = []) {
   const sorted = [...entries].sort((a, b) => a.day.localeCompare(b.day));
   return sorted.map((e) => {
     const row = {
-      day: e.day,
-      createdAt: e.createdAt,
-      updatedAt: e.updatedAt,
-      stress: e.stress,
-      fatigue: e.fatigue,
-      concentration: e.concentration,
-      mood: e.mood,
-      sleepHours: e.sleepHours,
-      sleepQuality: e.sleepQuality,
-      causes: (e.causes || []).join(', '),
-      causeOther: e.causeOther,
+      'День': e.day,
+      'Создано': localDateTime(e.createdAt),
+      'Изменено': localDateTime(e.updatedAt),
+      'Стресс (0–10)': e.stress,
+      'Усталость (0–10)': e.fatigue,
+      'Концентрация (0–10)': e.concentration,
+      'Настроение (1–5)': e.mood,
+      'Сон, ч': e.sleepHours,
+      'Качество сна (0–10)': e.sleepQuality,
+      'Причины стресса': (e.causes || []).join(', '),
+      'Своя причина': e.causeOther,
     };
     for (const f of factors) {
       const v = e.factors ? e.factors[f.id] : undefined;
-      row[`factor: ${f.name}`] = v === true ? 'да' : v === false ? 'нет' : v;
+      row[`Фактор: ${f.name}`] = v === true ? 'да' : v === false ? 'нет' : v;
     }
-    row.note = e.note;
-    row.demo = e.demo ? 'да' : '';
+    row['Заметка'] = e.note;
+    row['Демо-данные'] = e.demo ? 'да' : '';
     return row;
   });
 }

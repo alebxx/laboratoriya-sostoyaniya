@@ -1,6 +1,6 @@
 // Тесты: сборка записи дневника, пустая запись, свои факторы, CSV.
 import { describe, it, expect } from 'vitest';
-import { buildEntry, isEntryEmpty, validateFactor, diaryRowsForCsv } from '../src/logic/diary.js';
+import { buildEntry, isEntryEmpty, validateFactor, diaryRowsForCsv, localDateTime } from '../src/logic/diary.js';
 
 const now = new Date('2026-03-10T19:00:00Z');
 const factors = [
@@ -92,16 +92,24 @@ describe('validateFactor', () => {
 });
 
 describe('diaryRowsForCsv', () => {
-  it('факторы — отдельные столбцы, причины через запятую, сортировка по дню', () => {
+  it('русские заголовки, факторы — отдельные столбцы, причины через запятую, сортировка по дню', () => {
     const entries = [
       { day: '2026-03-11', stress: 2, causes: [], factors: { f2: 2 } },
-      { day: '2026-03-10', stress: 7, causes: ['учёба', 'недосып'], factors: { f1: true } },
+      { day: '2026-03-10', stress: 7, causes: ['учёба', 'недосып'], factors: { f1: true }, demo: true },
     ];
     const rows = diaryRowsForCsv(entries, factors);
-    expect(rows[0].day).toBe('2026-03-10');
-    expect(rows[0].causes).toBe('учёба, недосып');
-    expect(rows[0]['factor: кофе']).toBe('да');
-    expect(rows[0]['factor: часы спорта']).toBeUndefined();
-    expect(rows[1]['factor: часы спорта']).toBe(2);
+    expect(rows[0]['День']).toBe('2026-03-10');
+    expect(rows[0]['Стресс (0–10)']).toBe(7);
+    expect(rows[0]['Причины стресса']).toBe('учёба, недосып');
+    expect(rows[0]['Фактор: кофе']).toBe('да');
+    expect(rows[0]['Фактор: часы спорта']).toBeUndefined();
+    expect(rows[0]['Демо-данные']).toBe('да');
+    expect(rows[1]['Фактор: часы спорта']).toBe(2);
+  });
+
+  it('время — по местному времени в виде «ГГГГ-ММ-ДД ЧЧ:ММ»', () => {
+    const local = new Date(2026, 2, 10, 20, 36); // 10 марта 2026, 20:36 по местному времени
+    expect(localDateTime(local.toISOString())).toBe('2026-03-10 20:36');
+    expect(localDateTime(undefined)).toBe('');
   });
 });
