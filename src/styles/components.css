@@ -753,3 +753,13 @@ tr.is-today {
   border-radius: var(--radius);
   max-width: 280px;
 }
+
+/* ----- PSS-10 ----- */
+.pss-item legend {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.pss-num {
+  color: var(--text-muted);
+}

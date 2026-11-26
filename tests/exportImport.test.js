@@ -80,8 +80,8 @@ describe('экспорт и импорт', () => {
   });
 
   it('CSV других таблиц — столбцы по полям записей', async () => {
-    await put('pss', { id: 'p1', total: 20 });
-    expect(await exportStoreCsv('pss')).toBe('id;total\r\np1;20');
+    await put('pilot', { id: 'p1', total: 20 });
+    expect(await exportStoreCsv('pilot')).toBe('id;total\r\np1;20');
   });
 });
 
