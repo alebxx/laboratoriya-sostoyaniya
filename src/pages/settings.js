@@ -73,11 +73,14 @@ export async function renderSettings(root) {
     <section class="card" aria-labelledby="h-export">
       <h2 id="h-export">Резервная копия и выгрузка</h2>
       <p>Последняя резервная копия (JSON): <strong>${formatDateTime(s.lastBackupAt)}</strong></p>
-      <p>JSON — полная копия всех данных. Из неё можно восстановить всё на этом или другом устройстве.</p>
-      <button type="button" class="btn btn-primary" id="export-json">Скачать полную копию (JSON)</button>
+      <h3>Резервная копия (JSON)</h3>
+      <p>Полная копия всех данных — для восстановления через «Загрузку из копии» на этом или другом устройстве.
+         Этот файл предназначен для программы, а не для чтения: внутри он выглядит как код со скобками и кавычками. Так и должно быть.</p>
+      <button type="button" class="btn btn-primary" id="export-json">Скачать резервную копию (JSON)</button>
 
-      <h3>Таблицы CSV</h3>
-      <p>Для просмотра в Excel или Google Таблицах. Каждая таблица — отдельный файл.</p>
+      <h3>Таблицы для просмотра (CSV)</h3>
+      <p>Чтобы посмотреть свои данные в виде таблицы. Каждая таблица — отдельный файл.
+         Открывайте его в Numbers, Excel или Google Таблицах: в обычном текстовом редакторе таблица выглядит как строки, разделённые точкой с запятой.</p>
       <div class="button-list">
         ${CSV_TABLES.map(
           (t) => `<button type="button" class="btn" data-csv="${t.store}" data-file="${t.file}">${t.title}</button>`
