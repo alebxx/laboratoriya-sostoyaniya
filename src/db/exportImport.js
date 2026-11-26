@@ -8,6 +8,8 @@ import { validateImport, migrateImport } from '../logic/importCheck.js';
 import { diaryRowsForCsv } from '../logic/diary.js';
 import { sessionRowsForCsv, trialRowsForCsv } from '../logic/pvt.js';
 import { exclusionReason } from '../logic/sessionFilter.js';
+import { hypothesisRowsForCsv } from '../logic/hypothesis.js';
+import { allMetrics } from '../logic/series.js';
 
 // Какие таблицы выгружаются в CSV и как называются файлы.
 export const CSV_TABLES = [
@@ -17,6 +19,7 @@ export const CSV_TABLES = [
   { store: 'pvtTrials', file: 'test-popytki', title: 'Попытки теста на внимание' },
   { store: 'pss', file: 'pss10', title: 'PSS-10' },
   { store: 'hypotheses', file: 'gipotezy', title: 'Гипотезы' },
+  { store: 'experiments', file: 'samoeksperimenty', title: 'Самоэксперименты' },
 ];
 
 // Полная копия всех данных одним объектом (для JSON-файла).
@@ -50,6 +53,30 @@ export async function exportStoreCsv(store) {
   }
   if (store === 'pvtTrials') {
     return rowsToCsv(trialRowsForCsv(rows));
+  }
+  if (store === 'hypotheses') {
+    const factorsRow = await db.get('settings', 'customFactors');
+    return rowsToCsv(hypothesisRowsForCsv(rows, allMetrics(factorsRow ? factorsRow.value : [])));
+  }
+  if (store === 'experiments') {
+    // Одна строка на день эксперимента.
+    const out = [];
+    for (const e of rows) {
+      for (const s of e.schedule) {
+        out.push({
+          'ID эксперимента': e.id,
+          'Условие A': e.conditionA,
+          'Условие B': e.conditionB,
+          'Показатель': e.outcomeKey,
+          'День': s.day,
+          'Назначено': s.condition,
+          'Условие выполнено': e.followed?.[s.day] === true ? 'да' : e.followed?.[s.day] === false ? 'нет' : '',
+          'Итог эксперимента': e.result ? (e.result.insufficient ? 'данных недостаточно' : e.result.verdict) : '',
+          'Демо-данные': e.demo ? 'да' : '',
+        });
+      }
+    }
+    return rowsToCsv(out);
   }
   return rowsToCsv(rows);
 }

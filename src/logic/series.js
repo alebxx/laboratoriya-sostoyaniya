@@ -6,39 +6,55 @@
 // =====================================================================
 import { exclusionReason } from './sessionFilter.js';
 import { addDays } from './dates.js';
+import { CAUSES } from './diary.js';
 
 // Все показатели, которые можно показать на графике.
 //   source — откуда берутся данные; field — поле записи;
 //   min/max — постоянные границы шкалы (для шкал 0–10), иначе подбираются сами;
 //   integer — значения только целые (деления оси без дробей).
 export const METRICS = [
-  { key: 'stress', label: 'Стресс', source: 'diary', field: 'stress', min: 0, max: 10 },
-  { key: 'fatigue', label: 'Усталость', source: 'diary', field: 'fatigue', min: 0, max: 10 },
-  { key: 'concentration', label: 'Концентрация', source: 'diary', field: 'concentration', min: 0, max: 10 },
-  { key: 'mood', label: 'Настроение', source: 'diary', field: 'mood', min: 1, max: 5, integer: true },
-  { key: 'sleepHours', label: 'Сон, ч', source: 'diary', field: 'sleepHours' },
-  { key: 'sleepQuality', label: 'Качество сна', source: 'diary', field: 'sleepQuality', min: 0, max: 10 },
-  { key: 'pvtMedian', label: 'Тест: медиана реакции, мс', source: 'pvt', field: 'medianRt' },
-  { key: 'pvtLapses', label: 'Тест: пропуски', source: 'pvt', field: 'lapses', min: 0, integer: true },
-  { key: 'pvtSpeed', label: 'Тест: скорость реакции (1/RT)', source: 'pvt', field: 'meanSpeed' },
-  { key: 'pulse', label: 'Пульс, уд/мин', source: 'physio', field: 'pulse' },
-  { key: 'systolic', label: 'Давление систолическое', source: 'physio', field: 'systolic' },
-  { key: 'diastolic', label: 'Давление диастолическое', source: 'physio', field: 'diastolic' },
-  { key: 'pssTotal', label: 'PSS-10: общий балл', source: 'pss', field: 'total' },
+  { key: 'stress', name: 'стресс', label: 'Стресс', source: 'diary', field: 'stress', min: 0, max: 10 },
+  { key: 'fatigue', name: 'усталость', label: 'Усталость', source: 'diary', field: 'fatigue', min: 0, max: 10 },
+  { key: 'concentration', name: 'концентрация', label: 'Концентрация', source: 'diary', field: 'concentration', min: 0, max: 10 },
+  { key: 'mood', name: 'настроение', label: 'Настроение', source: 'diary', field: 'mood', min: 1, max: 5, integer: true },
+  { key: 'sleepHours', name: 'сон (часы)', label: 'Сон, ч', source: 'diary', field: 'sleepHours' },
+  { key: 'sleepQuality', name: 'качество сна', label: 'Качество сна', source: 'diary', field: 'sleepQuality', min: 0, max: 10 },
+  { key: 'pvtMedian', name: 'медиана реакции в тесте', label: 'Тест: медиана реакции, мс', source: 'pvt', field: 'medianRt' },
+  { key: 'pvtLapses', name: 'пропуски в тесте', label: 'Тест: пропуски', source: 'pvt', field: 'lapses', min: 0, integer: true },
+  { key: 'pvtSpeed', name: 'скорость реакции в тесте', label: 'Тест: скорость реакции (1/RT)', source: 'pvt', field: 'meanSpeed' },
+  { key: 'pulse', name: 'пульс', label: 'Пульс, уд/мин', source: 'physio', field: 'pulse' },
+  { key: 'systolic', name: 'систолическое давление', label: 'Давление систолическое', source: 'physio', field: 'systolic' },
+  { key: 'diastolic', name: 'диастолическое давление', label: 'Давление диастолическое', source: 'physio', field: 'diastolic' },
+  { key: 'pssTotal', name: 'балл PSS-10', label: 'PSS-10: общий балл', source: 'pss', field: 'total' },
 ];
 
 // Список показателей вместе со своими факторами пользователя.
 // «Да/нет» показывается как 1 (да) и 0 (нет).
+//   boolean — показатель «да/нет» (для гипотез дни делятся на «да» и «нет»);
+//   name — короткое название для фраз вроде «Когда кофе: да, …».
 export function allMetrics(factors = []) {
   const custom = factors.map((f) => ({
     key: `factor:${f.id}`,
     label: `Фактор: ${f.name}${f.type === 'bool' ? ' (1 — да, 0 — нет)' : ''}`,
+    name: f.name,
     source: 'factor',
     factorId: f.id,
     factorType: f.type,
-    ...(f.type === 'bool' ? { min: 0, max: 1, integer: true } : {}),
+    ...(f.type === 'bool' ? { min: 0, max: 1, integer: true, boolean: true } : {}),
   }));
-  return [...METRICS, ...custom];
+  // Причины стресса из дневника: 1 — причина отмечена в записи дня, 0 — не отмечена.
+  const causes = CAUSES.map((c) => ({
+    key: `cause:${c}`,
+    label: `Причина стресса «${c}» (1 — отмечена, 0 — нет)`,
+    name: `причина «${c}» отмечена`,
+    source: 'cause',
+    cause: c,
+    min: 0,
+    max: 1,
+    integer: true,
+    boolean: true,
+  }));
+  return [...METRICS, ...custom, ...causes];
 }
 
 function isNumber(v) {
@@ -67,6 +83,9 @@ export function dailyValues(metric, data, options = {}) {
       if (v === true || v === false) points.push({ day: e.day, value: v ? 1 : 0 });
       else if (isNumber(v)) points.push({ day: e.day, value: v });
     }
+  } else if (metric.source === 'cause') {
+    // Каждая запись дневника: причина отмечена (1) или нет (0).
+    points = (data.diary || []).map((e) => ({ day: e.day, value: (e.causes || []).includes(metric.cause) ? 1 : 0 }));
   } else if (metric.source === 'pvt') {
     // За день берём ПЕРВЫЙ учитываемый сеанс (завершён, не тренировочный,
     // с основного устройства). Остальные сеансы — исключённые.

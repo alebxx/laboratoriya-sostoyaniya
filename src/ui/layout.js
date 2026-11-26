@@ -74,9 +74,14 @@ export function setupLayout() {
 }
 
 // Подсветить в меню текущий раздел.
+// Вложенные страницы подсвечивают свой раздел: #/hypotheses/new → «Гипотезы».
+const SECTION_OF = { experiments: 'hypotheses', 'pvt-selfcheck': 'pvt' };
+
 export function markCurrentNav(path) {
+  const first = path.split('/')[1] || '';
+  const section = '/' + (SECTION_OF[first] || first);
   for (const a of document.querySelectorAll('#main-nav a')) {
-    if (a.getAttribute('href') === '#' + path) a.setAttribute('aria-current', 'page');
+    if (a.getAttribute('href') === '#' + section) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   }
 }

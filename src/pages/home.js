@@ -1,7 +1,9 @@
 // =====================================================================
 // Главная страница.
 // =====================================================================
-import { getAllSettings, setSetting, get } from '../db/repo.js';
+import { getAllSettings, setSetting, get, getAll } from '../db/repo.js';
+import { conditionForDay } from '../logic/alternation.js';
+import { escapeHtml } from '../ui/helpers.js';
 import { dayKeyFor } from '../logic/dates.js';
 import { hasUserData } from '../db/exportImport.js';
 import { shouldRemindBackup, snoozeUntil } from '../logic/backupReminder.js';
@@ -21,6 +23,11 @@ export async function renderHome(root) {
   const settings = await getAllSettings();
   const remind = shouldRemindBackup(settings, await hasUserData());
   const todayEntry = await get('diary', dayKeyFor());
+  // Идущие самоэксперименты: какое условие сегодня.
+  const todayConditions = (await getAll('experiments'))
+    .filter((e) => !e.result)
+    .map((e) => ({ e, cond: conditionForDay(e, dayKeyFor()) }))
+    .filter((x) => x.cond);
 
   root.innerHTML = `
     <h1>Лаборатория состояния</h1>
@@ -46,6 +53,13 @@ export async function renderHome(root) {
         ? '<p>Запись в дневнике за сегодня есть.</p><a class="btn" href="#/diary">Открыть и изменить</a>'
         : '<p>Записи в дневнике за сегодня пока нет. Это займёт 1–2 минуты.</p><a class="btn btn-primary" href="#/diary">Заполнить дневник</a>'}
     </section>
+
+    ${todayConditions.map(({ e, cond }) => `
+      <section class="card card-important" aria-label="Самоэксперимент: условие на сегодня">
+        <h2>Самоэксперимент: сегодня условие ${cond}</h2>
+        <p class="big-condition">${escapeHtml(cond === 'A' ? e.conditionA : e.conditionB)}</p>
+        <a class="btn" href="#/experiments/view?id=${encodeURIComponent(e.id)}">Открыть эксперимент</a>
+      </section>`).join('')}
 
     <section class="card card-important" aria-labelledby="not-medical-title">
       <h2 id="not-medical-title">Важно знать</h2>

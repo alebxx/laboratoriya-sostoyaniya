@@ -12,6 +12,11 @@ import { renderDiary } from './pages/diary.js';
 import { renderPvt } from './pages/pvt.js';
 import { renderSelfcheck } from './pages/selfcheck.js';
 import { renderCharts } from './pages/charts.js';
+import { renderHypotheses } from './pages/hypotheses.js';
+import { renderHypothesisNew } from './pages/hypothesisNew.js';
+import { renderHypothesisView } from './pages/hypothesisView.js';
+import { renderExperimentNew } from './pages/experimentNew.js';
+import { renderExperimentView } from './pages/experimentView.js';
 import { placeholder } from './pages/placeholder.js';
 
 // Таблица «адрес → функция, которая рисует страницу».
@@ -23,7 +28,11 @@ const routes = {
   '/pvt': renderPvt,
   '/pvt-selfcheck': renderSelfcheck,
   '/charts': renderCharts,
-  '/hypotheses': placeholder('Гипотезы', 5),
+  '/hypotheses': renderHypotheses,
+  '/hypotheses/new': renderHypothesisNew,
+  '/hypotheses/view': renderHypothesisView,
+  '/experiments/new': renderExperimentNew,
+  '/experiments/view': renderExperimentView,
   '/physio': placeholder('Пульс и давление', 6),
   '/pss': placeholder('PSS-10', 7),
   '/regulation': placeholder('Саморегуляция', 8),

@@ -73,6 +73,11 @@ docs/
 | Список показателей на графиках и их подписи | `src/logic/series.js` → `METRICS` |
 | Порог «данных пока мало» (сейчас 7) | `src/config.js` → `ANALYSIS.minPointsForConclusions` |
 | Цвета линий графиков | `src/styles/theme.css` → `--series-1`, `--series-2` |
+| Тексты-пояснения в разделе «Гипотезы» («зачем фиксировать», «что ещё могло повлиять») | `src/data/hypothesisTexts.js` |
+| Число перестановок и граница 0,05 | `src/config.js` → `ANALYSIS` |
+| Как дни делятся на группы, точка проверки, итог | `src/logic/hypothesis.js` |
+| Перестановочный тест и правило итога | `src/logic/permutation.js` |
+| Самоэксперимент: расписание и итог | `src/logic/alternation.js` |
 | Когда показывать мягкую заботу (порог стресса, число дней) | `src/config.js` → `CARE` |
 | Тексты из научных источников (вопросы, советы) | файлы в `src/data/`, список — в `docs/todo-content.md` |
 | Цвета | `src/styles/theme.css` |
