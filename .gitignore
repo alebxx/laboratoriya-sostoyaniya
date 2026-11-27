@@ -2,3 +2,10 @@ node_modules/
 dist/
 .DS_Store
 .claude/
+
+# Выгрузки данных с сайта (резервные копии, таблицы, файлы пилота) —
+# в них личные записи, в репозиторий их класть нельзя.
+laboratoriya-*.json
+laboratoriya-*.csv
+pilot-*.json
+pilot-*.csv
