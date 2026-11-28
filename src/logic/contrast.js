@@ -52,13 +52,6 @@ export const CONTRAST_PAIRS = [
   ['Рамка фокуса / карточка', 'focus', 'surface', 3],
   ['Рамка «удалить» / карточка', 'danger', 'surface', 3],
   ['Контур талисмана / фон', 'mascot-line', 'bg', 3],
-  ['Текст на рамке-шапке', 'on-frame', 'frame', 4.5],
-  ['Второстепенный текст на рамке', 'on-frame-muted', 'frame', 4.5],
-  ['Текст на выбранном пункте меню', 'on-frame', 'frame-active', 4.5],
-  ['Рамка фокуса в шапке / рамка-шапка', 'focus-on-frame', 'frame', 3],
-  ['Текст тёмного блока-«заявления»', 'statement-text', 'statement-bg', 4.5],
-  ['Второстепенный текст тёмного блока', 'statement-muted', 'statement-bg', 4.5],
-  ['Текст «заявления» на середине атласа', 'statement-text', 'satin-2', 4.5],
   ...METRICS.flatMap(([key, name]) => [
     [`Цвет «${name}» / карточка`, key, 'surface', 3],
     [`Цвет «${name}» / фон`, key, 'bg', 3],

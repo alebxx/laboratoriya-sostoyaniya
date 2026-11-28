@@ -1,163 +1,116 @@
 /* =====================================================================
    ДИЗАЙН-ТОКЕНЫ «Лаборатории состояния».
-   Стиль — по мотивам темы maroon-fintech-landing (палитра Forest):
-   хвойная рамка, кремовая бумага, «чернильный» текст, атласные блики.
    Все цвета сайта — только эти переменные. Поменяли здесь — поменялось везде.
 
    Две темы:
-     дневная — светлая (блок .theme-light);
-     ночная  — тёмная  (блок .theme-dark).
+     «дневная лаборатория» — светлая (блок .theme-light);
+     «ночная лаборатория»  — тёмная  (блок .theme-dark).
    Режим «как в системе» берёт тему из настроек устройства.
 
    У каждого показателя один и тот же оттенок в обеих темах;
-   в тёмной — светлее и мягче. Цвет показателя — только его «имя», а не оценка.
+   в тёмной — светлее и мягче. Красный и зелёный не означают «плохо/хорошо»:
+   цвет показателя — только его «имя», а не оценка.
 
    Контраст всех пар проверяется командой  npm run contrast
-   (результаты — в docs/design.md). Ночная тема ниже повторена дважды
-   (по настройке системы и по ручному выбору) — значения должны совпадать,
-   это проверяет тест.
+   (результаты — в docs/design.md).
    ===================================================================== */
 
-/* ---------- Дневная тема ---------- */
+/* ---------- Дневная лаборатория (светлая) ---------- */
 :root,
 .theme-light {
   color-scheme: light;
 
   /* Поверхности */
-  --bg: #e5e4da; /* бумага (фон страницы) */
-  --surface: #f5f4ee; /* карточки — кремовые */
-  --surface-raised: #ffffff; /* всплывающие окна */
-  --surface-sunken: #dad9ce; /* поля, дорожки */
-  --border: #cfcdc1; /* тонкие разделители */
-  --border-strong: #6f756b; /* рамки полей ввода (контраст ≥ 3:1) */
+  --bg: #faf7f2; /* тёплый молочный фон */
+  --surface: #ffffff; /* карточки */
+  --surface-raised: #ffffff; /* всплывающие окна (отделяются тенью) */
+  --surface-sunken: #f3eee6; /* поля ввода, дорожка ползунка */
+  --border: #e7e0d6; /* тонкие разделители */
+  --border-strong: #8f8376; /* рамки полей ввода (контраст ≥ 3:1) */
+  --shadow: 0 1px 2px rgba(70, 50, 30, 0.06), 0 6px 20px rgba(70, 50, 30, 0.07);
+  --shadow-raised: 0 4px 12px rgba(70, 50, 30, 0.1), 0 16px 40px rgba(70, 50, 30, 0.1);
 
   /* Текст */
-  --text: #141a16; /* основной: почти чёрный «чернильный» */
-  --text-muted: #545b51; /* второстепенный */
+  --text: #2b2724; /* основной: тёмно-коричневый */
+  --text-muted: #675d54; /* второстепенный */
 
   /* Акцент (кнопки, ссылки, выбранное) */
-  --accent: #2f5640; /* хвойный */
-  --accent-hover: #24442f;
+  --accent: #3b7566;
+  --accent-hover: #2f6155;
   --on-accent: #ffffff;
-  --accent-soft: #d9e2d6; /* фон выбранного варианта */
-  --focus: #8a5810; /* рамка фокуса с клавиатуры */
-
-  /* Рамка (шапка сайта) и тёмные блоки-«заявления» */
-  --frame: #2f4436; /* рамка-шапка */
-  --on-frame: #ecebe1; /* текст на рамке */
-  --on-frame-muted: #bfc6b8;
-  --frame-active: #41594a; /* выбранный пункт меню на рамке */
-  --focus-on-frame: #ffd98a; /* рамка фокуса на тёмной шапке */
-  --statement-bg: #121d17; /* тёмный блок-«заявление» */
-  --statement-text: #ecebe1;
-  --statement-muted: #aeb5a9;
-  --satin-1: #0d1712; /* атлас: тень */
-  --satin-2: #4f6b4f; /* атлас: середина */
-  --satin-3: #e6e4c8; /* атлас: блик */
-  --glow: #ffd98a; /* тёплый свет */
+  --accent-soft: #e5efeb; /* фон выбранного варианта */
+  --focus: #a35a12; /* рамка фокуса с клавиатуры */
 
   /* Сообщения */
-  --notice-bg: #ede2c0; /* спокойное предупреждение (песочный) */
-  --notice-border: #9c7a2a;
-  --danger: #8a3b2f; /* только для необратимых действий («удалить») */
+  --notice-bg: #fbf1de; /* спокойное предупреждение (песочный) */
+  --notice-border: #c49a4a;
+  --danger: #9c4a3b; /* только для необратимых действий («удалить») */
   --on-danger: #ffffff;
 
   /* Цвет каждого показателя */
   --m-stress: #773f9b; /* сливово-фиолетовый */
-  --m-fatigue: #a66a14; /* охра */
-  --m-sleep: #2f6cb8; /* синий */
-  --m-concentration: #2a6630; /* хвойный */
-  --m-test: #108a8f; /* бирюзовый */
-  --m-pulse: #b0406f; /* розово-малиновый */
+  --m-fatigue: #b67819; /* охра */
+  --m-sleep: #3072c1; /* синий */
+  --m-concentration: #357a3a; /* хвойный */
+  --m-test: #1c989e; /* бирюзовый */
+  --m-pulse: #b84379; /* розово-малиновый */
   --m-pss: #3e4858; /* грифельный */
-  --m-other: #545b51; /* настроение, свои факторы, причины — нейтральный */
+  --m-other: #675d54; /* настроение, свои факторы, причины — нейтральный */
 
   /* Талисман */
-  --mascot-line: #141a16;
-  --mascot-glass: #f5f4ee;
-  --mascot-liquid: #9db59c; /* шалфей */
-  --mascot-cheek: #e3a99a;
+  --mascot-line: #4a3f36;
+  --mascot-glass: #ffffff;
+  --mascot-liquid: #8fcbbb;
+  --mascot-cheek: #f2a9b8;
+  --mascot-glow: transparent;
+  --night-only: none; /* «ночные» детали скрыты днём */
 
   /* Графики */
-  --chart-grid: #d6d5ca;
-  --chart-label: #545b51;
-
-  --shadow: 0 1px 2px rgba(20, 26, 22, 0.08), 0 8px 22px -10px rgba(20, 26, 22, 0.22);
-  --shadow-raised: 0 6px 16px -6px rgba(20, 26, 22, 0.25), 0 20px 40px -16px rgba(20, 26, 22, 0.25);
-  --mascot-glow: transparent;
-  --night-only: none;
+  --chart-grid: #ece6dc;
+  --chart-label: #675d54;
   --chart-line: 2px;
 }
 
-/* ---------- Ночная тема ----------
-   Глубина — через светлоту: чем выше слой, тем он светлее. Теней почти нет. */
+/* ---------- Ночная лаборатория (тёмная) ---------- */
+/* Глубина — через светлоту: чем выше слой, тем он светлее. Теней почти нет. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-
-    /* Поверхности */
-    --bg: #121d17;
-    --surface: #1c2c22;
-    --surface-raised: #253a2d;
-    --surface-sunken: #0f1813;
-    --border: #2c4033;
-    --border-strong: #6f8475;
-
-    /* Текст */
-    --text: #ecebe1;
-    --text-muted: #a9b0a5;
-
-    /* Акцент (кнопки, ссылки, выбранное) */
-    --accent: #9cc9ab;
-    --accent-hover: #b5d8c1;
-    --on-accent: #121d17;
-    --accent-soft: #22382b;
-    --focus: #ffd98a;
-
-    /* Рамка (шапка сайта) и тёмные блоки-«заявления» */
-    --frame: #0d1712;
-    --on-frame: #ecebe1;
-    --on-frame-muted: #a9b0a5;
-    --frame-active: #22382b;
-    --focus-on-frame: #ffd98a;
-    --statement-bg: #0d1712;
-    --statement-text: #ecebe1;
-    --statement-muted: #a9b0a5;
-    --satin-1: #0a120e;
-    --satin-2: #3f5a43;
-    --satin-3: #c9c7a8;
-    --glow: #ffd98a;
-
-    /* Сообщения */
-    --notice-bg: #2b2a1a;
-    --notice-border: #c9a45a;
-    --danger: #e6a090;
-    --on-danger: #121d17;
-
-    /* Цвет каждого показателя */
+    --bg: #1c1a18;
+    --surface: #262320;
+    --surface-raised: #302c28;
+    --surface-sunken: #211f1c;
+    --border: #3a3530;
+    --border-strong: #8a8075;
+    --shadow: none;
+    --shadow-raised: 0 0 0 1px #4a443d;
+    --text: #ede8e1;
+    --text-muted: #b5ab9f;
+    --accent: #7cc4b2;
+    --accent-hover: #98d3c4;
+    --on-accent: #1c1a18;
+    --accent-soft: #263a34;
+    --focus: #e9b66c;
+    --notice-bg: #352b1c;
+    --notice-border: #b8904a;
+    --danger: #e59c8c;
+    --on-danger: #1c1a18;
     --m-stress: #bc8fdd;
     --m-fatigue: #fcc683;
     --m-sleep: #89beff;
     --m-concentration: #8ac28b;
     --m-test: #90e1e6;
     --m-pulse: #fe9ac2;
-    --m-pss: #8e97a5;
-    --m-other: #a9b0a5;
-
-    /* Талисман */
-    --mascot-line: #ecebe1;
-    --mascot-glass: #25392c;
-    --mascot-liquid: #6f9a7c;
-    --mascot-cheek: #c98a7f;
-
-    /* Графики */
-    --chart-grid: #263a2e;
-    --chart-label: #a3ab9f;
-
-    --shadow: none;
-    --shadow-raised: 0 0 0 1px #35503f;
-    --mascot-glow: rgba(255, 217, 138, 0.3);
+    --m-pss: #848d9b;
+    --m-other: #b5ab9f;
+    --mascot-line: #ede8e1;
+    --mascot-glass: #2f3a37;
+    --mascot-liquid: #5e9c8d;
+    --mascot-cheek: #c97f93;
+    --mascot-glow: rgba(124, 196, 178, 0.35);
     --night-only: inline;
+    --chart-grid: #332f2a;
+    --chart-label: #a59b8f;
     --chart-line: 2.5px;
   }
 }
@@ -165,81 +118,49 @@
 :root[data-theme='dark'],
 .theme-dark {
   color-scheme: dark;
-
-  /* Поверхности */
-  --bg: #121d17;
-  --surface: #1c2c22;
-  --surface-raised: #253a2d;
-  --surface-sunken: #0f1813;
-  --border: #2c4033;
-  --border-strong: #6f8475;
-
-  /* Текст */
-  --text: #ecebe1;
-  --text-muted: #a9b0a5;
-
-  /* Акцент (кнопки, ссылки, выбранное) */
-  --accent: #9cc9ab;
-  --accent-hover: #b5d8c1;
-  --on-accent: #121d17;
-  --accent-soft: #22382b;
-  --focus: #ffd98a;
-
-  /* Рамка (шапка сайта) и тёмные блоки-«заявления» */
-  --frame: #0d1712;
-  --on-frame: #ecebe1;
-  --on-frame-muted: #a9b0a5;
-  --frame-active: #22382b;
-  --focus-on-frame: #ffd98a;
-  --statement-bg: #0d1712;
-  --statement-text: #ecebe1;
-  --statement-muted: #a9b0a5;
-  --satin-1: #0a120e;
-  --satin-2: #3f5a43;
-  --satin-3: #c9c7a8;
-  --glow: #ffd98a;
-
-  /* Сообщения */
-  --notice-bg: #2b2a1a;
-  --notice-border: #c9a45a;
-  --danger: #e6a090;
-  --on-danger: #121d17;
-
-  /* Цвет каждого показателя */
+  --bg: #1c1a18;
+  --surface: #262320;
+  --surface-raised: #302c28;
+  --surface-sunken: #211f1c;
+  --border: #3a3530;
+  --border-strong: #8a8075;
+  --shadow: none;
+  --shadow-raised: 0 0 0 1px #4a443d;
+  --text: #ede8e1;
+  --text-muted: #b5ab9f;
+  --accent: #7cc4b2;
+  --accent-hover: #98d3c4;
+  --on-accent: #1c1a18;
+  --accent-soft: #263a34;
+  --focus: #e9b66c;
+  --notice-bg: #352b1c;
+  --notice-border: #b8904a;
+  --danger: #e59c8c;
+  --on-danger: #1c1a18;
   --m-stress: #bc8fdd;
   --m-fatigue: #fcc683;
   --m-sleep: #89beff;
   --m-concentration: #8ac28b;
   --m-test: #90e1e6;
   --m-pulse: #fe9ac2;
-  --m-pss: #8e97a5;
-  --m-other: #a9b0a5;
-
-  /* Талисман */
-  --mascot-line: #ecebe1;
-  --mascot-glass: #25392c;
-  --mascot-liquid: #6f9a7c;
-  --mascot-cheek: #c98a7f;
-
-  /* Графики */
-  --chart-grid: #263a2e;
-  --chart-label: #a3ab9f;
-
-  --shadow: none;
-  --shadow-raised: 0 0 0 1px #35503f;
-  --mascot-glow: rgba(255, 217, 138, 0.3);
+  --m-pss: #848d9b;
+  --m-other: #b5ab9f;
+  --mascot-line: #ede8e1;
+  --mascot-glass: #2f3a37;
+  --mascot-liquid: #5e9c8d;
+  --mascot-cheek: #c97f93;
+  --mascot-glow: rgba(124, 196, 178, 0.35);
   --night-only: inline;
+  --chart-grid: #332f2a;
+  --chart-label: #a59b8f;
   --chart-line: 2.5px;
 }
 
 /* ---------- Общие для обеих тем ---------- */
 :root {
-  /* Шрифт Inter Tight лежит в проекте (лицензия SIL OFL 1.1). */
-  --font: 'Inter Tight Variable', 'Inter Tight', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  /* Почти прямые углы — как у лендинга. */
-  --radius: 10px;
-  --radius-small: 6px;
-  --radius-control: 6px; /* кнопки, поля, варианты ответа */
+  --font: 'Nunito Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius: 18px;
+  --radius-small: 12px;
 }
 
 /* ---------- Экран теста PVT: один вид в обеих темах ----------

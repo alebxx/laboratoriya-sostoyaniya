@@ -111,7 +111,7 @@ export async function renderHome(root) {
         </a></li>`).join('')}
     </ul>
 
-    <section class="statement" aria-labelledby="not-medical-title">
+    <section class="card card-important" aria-labelledby="not-medical-title">
       <h2 id="not-medical-title" class="card-title">${icon('Info', 20)}Важно знать</h2>
       <p>${NOT_MEDICAL}</p>
       <p>${CORRELATION_NOTE}</p>

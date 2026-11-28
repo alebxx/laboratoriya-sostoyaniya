@@ -1,8 +1,8 @@
 // =====================================================================
 // Точка входа: отсюда запускается весь сайт.
 // =====================================================================
-// Шрифт Inter Tight лежит в проекте (лицензия SIL OFL 1.1) — без внешних запросов.
-import '@fontsource-variable/inter-tight';
+// Шрифт Nunito лежит в проекте (лицензия SIL OFL 1.1) — без внешних запросов.
+import '@fontsource-variable/nunito';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
