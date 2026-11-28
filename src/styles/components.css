@@ -1032,6 +1032,15 @@ tr.is-today {
 .pss-item legend {
   font-weight: 700;
   margin-bottom: 10px;
+  /* Без float заголовок fieldset садится на рамку карточки.
+     float переносит его внутрь, вопрос целиком в карточке. */
+  float: left;
+  width: 100%;
+  padding: 0;
+}
+
+.pss-item legend + * {
+  clear: both;
 }
 
 .pss-num {

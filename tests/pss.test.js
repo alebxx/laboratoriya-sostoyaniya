@@ -105,15 +105,14 @@ describe('не чаще раза в месяц', () => {
 });
 
 describe('тексты опросника', () => {
-  it('10 вопросов без заглушек, шкала 0–4 с подписями крайних ответов', () => {
+  it('10 вопросов без заглушек, шкала 0–4 с подписями всех ответов', () => {
     expect(PSS_ITEMS).toHaveLength(10);
     expect(PSS_ITEMS.every((t) => t.startsWith('Как часто за последний месяц'))).toBe(true);
     expect(PSS.scale).toBe('0-4');
     expect(hasPlaceholders('0-4')).toBe(false);
     const labels = PSS_ANSWER_LABELS['0-4'];
     expect(labels.map((l) => l.value)).toEqual([0, 1, 2, 3, 4]);
-    expect(labels[0].label).toBe('никогда');
-    expect(labels[4].label).toBe('очень часто');
+    expect(labels.map((l) => l.label)).toEqual(['никогда', 'почти никогда', 'иногда', 'часто', 'очень часто']);
   });
 });
 
