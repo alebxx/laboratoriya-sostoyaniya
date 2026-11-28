@@ -4,7 +4,7 @@
 // Так сайт работает на GitHub Pages без настройки сервера.
 // =====================================================================
 import { getSetting } from './db/repo.js';
-import { mascot } from './ui/mascot.js';
+import { mascot, setMascotCat } from './ui/mascot.js';
 import { markCurrentNav } from './ui/layout.js';
 import { renderOnboarding } from './pages/onboarding.js';
 import { renderHome } from './pages/home.js';
@@ -71,6 +71,10 @@ async function render() {
     return;
   }
   document.body.classList.toggle('is-onboarding', path === '/onboarding');
+  // Котик-персонаж, выбранный пользователем (по умолчанию — Пипетка).
+  setMascotCat(await getSetting('cat', null));
+  document.getElementById('offline-mascot').innerHTML = mascot('oops', { size: 40 });
+
   // Пункт меню «Пилот» виден только при включённом режиме пилота.
   const pilot = await getSetting('pilot', null);
   document.getElementById('nav-pilot').hidden = !pilot?.enabled;

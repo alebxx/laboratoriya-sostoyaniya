@@ -7,6 +7,8 @@ import { loadDemoData } from '../db/demoLoader.js';
 import { exportAllData, exportStoreCsv, importAllData, CSV_TABLES } from '../db/exportImport.js';
 import { setTheme, themePickerHtml, setupThemePicker } from '../ui/layout.js';
 import { icon } from '../ui/icons.js';
+import { catPickerHtml, readCatPicker } from '../ui/catPicker.js';
+import { setMascotCat, DEFAULT_CAT, catName } from '../ui/mascot.js';
 import { downloadFile, formatDateTime, fileDate, escapeHtml, showStatus } from '../ui/helpers.js';
 import { DEVICE_TYPES } from './onboarding.js';
 import { MIN_AGE } from '../config.js';
@@ -26,6 +28,14 @@ export async function renderSettings(root) {
       <h2 id="h-theme" class="card-title">${icon('SunMoon', 22)}Оформление</h2>
       ${themePickerHtml('theme')}
       <p class="hint">Экран теста внимания выглядит одинаково в обеих темах, чтобы тема не влияла на время реакции.</p>
+    </section>
+
+    <section class="card" aria-labelledby="h-cat">
+      <h2 id="h-cat" class="card-title">${icon('Sparkles', 22)}Ваш котик</h2>
+      <form id="cat-form" novalidate>
+        ${catPickerHtml('cat', s.cat || DEFAULT_CAT)}
+      </form>
+      <p class="hint">Котик меняется сразу на всех страницах сайта.</p>
     </section>
 
     <section class="card" aria-labelledby="h-device">
@@ -146,6 +156,14 @@ export async function renderSettings(root) {
 
   // Тема
   setupThemePicker(root, 'theme');
+
+  // Смена котика — сохраняется сразу при выборе
+  root.querySelector('#cat-form').addEventListener('change', async (e) => {
+    const cat = readCatPicker(e.currentTarget, 'cat');
+    await setSetting('cat', cat);
+    setMascotCat(cat);
+    showStatus(document.getElementById('status'), `Теперь ваш котик — ${catName(cat)}.`);
+  });
 
   // Устройство
   root.querySelector('#device-form').addEventListener('submit', async (e) => {

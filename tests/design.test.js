@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { greetingFor, entriesLastWeek, weeklyCheer } from '../src/logic/encourage.js';
-import { mascot, MASCOT_POSES } from '../src/ui/mascot.js';
+import { mascot, MASCOT_POSES, CATS, DEFAULT_CAT, setMascotCat, catName, currentCatId, mascotLabel } from '../src/ui/mascot.js';
 import { metricGroup } from '../src/ui/metricStyle.js';
 import { checkPairs, parseTokens, PVT_PAIRS } from '../src/logic/contrast.js';
 
@@ -69,6 +69,44 @@ describe('талисман «Пипетка»', () => {
   it('декоративная по умолчанию, с подписью — доступна программам чтения', () => {
     expect(mascot('greet')).toMatch(/aria-hidden="true"/);
     expect(mascot('greet', { label: 'Пипетка машет лапкой' })).toMatch(/role="img" aria-label="Пипетка машет лапкой"/);
+  });
+});
+
+describe('выбор котика', () => {
+  it('6 котиков, у каждого все 9 поз без заготовок редактора', () => {
+    expect(CATS.map((c) => c.id)).toEqual(['pipetka', 'menzurka', 'kolba', 'buretka', 'retorta', 'kaplya']);
+    for (const c of CATS) {
+      for (const pose of MASCOT_POSES) {
+        const svg = mascot(pose, { cat: c.id });
+        expect(svg).toMatch(new RegExp(`cat-${c.id}`));
+        expect(svg).toContain(`--coat: ${c.colors.coat}`);
+        expect(svg).not.toMatch(/\{\{/); // {{accent}} в рисунке — чёрная колба
+      }
+    }
+  });
+  it('вислоухие уши — только у Мензурки', () => {
+    const fold = 'M42 70 Q36 40 62 34';
+    for (const c of CATS) {
+      const svg = mascot('greet', { cat: c.id });
+      expect(svg.includes(fold)).toBe(c.ears === 'fold');
+    }
+    expect(CATS.filter((c) => c.ears === 'fold').map((c) => c.id)).toEqual(['menzurka']);
+  });
+  it('выбранный котик рисуется по умолчанию; неизвестный — Пипетка', () => {
+    setMascotCat('kolba');
+    expect(mascot('greet')).toMatch(/cat-kolba/);
+    expect(catName()).toBe('Колба');
+    expect(mascotLabel('magnifier')).toBe('Колба с лупой');
+    setMascotCat('нет-такого');
+    expect(currentCatId()).toBe(DEFAULT_CAT);
+    setMascotCat(null);
+    expect(catName()).toBe('Пипетка');
+  });
+  it('у всех котиков есть имя и описание окраса', () => {
+    for (const c of CATS) {
+      expect(c.name.length).toBeGreaterThan(0);
+      expect(c.description.length).toBeGreaterThan(0);
+    }
   });
 });
 

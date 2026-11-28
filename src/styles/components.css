@@ -1065,3 +1065,61 @@ tr.is-today {
     height: 60px;
   }
 }
+
+/* ----- Выбор котика ----- */
+.cat-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.cat-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.cat-option:hover {
+  border-color: var(--border-strong);
+}
+
+/* Радиокнопка скрыта визуально, но доступна с клавиатуры */
+.cat-option input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.cat-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.cat-option:has(input:checked) .mascot {
+  transform: translateY(-2px);
+}
+
+.cat-option:has(input:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.cat-option .mascot {
+  transition: transform 0.15s;
+}
+
+.cat-option span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.25;
+}

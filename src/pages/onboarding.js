@@ -6,7 +6,8 @@ import { setSetting } from '../db/repo.js';
 import { NOT_MEDICAL, PRIVACY, STORAGE_WARNING, CORRELATION_NOTE } from '../data/texts.js';
 import { MIN_AGE } from '../config.js';
 import { escapeHtml } from '../ui/helpers.js';
-import { mascot } from '../ui/mascot.js';
+import { mascot, setMascotCat, DEFAULT_CAT } from '../ui/mascot.js';
+import { catPickerHtml, readCatPicker } from '../ui/catPicker.js';
 import { icon } from '../ui/icons.js';
 
 export const DEVICE_TYPES = [
@@ -17,7 +18,7 @@ export const DEVICE_TYPES = [
 
 export function renderOnboarding(root) {
   // Ответы копим здесь и сохраняем в базу в самом конце.
-  const answers = { age13plus: null };
+  const answers = { age13plus: null, cat: DEFAULT_CAT };
 
   // ----- Шаг 1. Что это за сайт -----
   function step1() {
@@ -25,7 +26,7 @@ export function renderOnboarding(root) {
       <div class="with-mascot">
         ${mascot('greet', { size: 110 })}
         <div>
-          <p class="step-label">Шаг 1 из 3</p>
+          <p class="step-label">Шаг 1 из 4</p>
           <h1 style="margin-top:0">Добро пожаловать в «Лабораторию состояния»</h1>
         </div>
       </div>
@@ -71,7 +72,7 @@ export function renderOnboarding(root) {
   function step2() {
     root.innerHTML = `
       <h1>Возраст</h1>
-      <p class="step-label">Шаг 2 из 3</p>
+      <p class="step-label">Шаг 2 из 4</p>
       <section class="card">
         <p>Сайт рассчитан на пользователей ${MIN_AGE} лет и старше. Дату рождения мы не спрашиваем.</p>
         <p id="age-q"><strong>Вам ${MIN_AGE} лет или больше?</strong></p>
@@ -103,11 +104,41 @@ export function renderOnboarding(root) {
       });
     }
     root.querySelector('#back2').addEventListener('click', step1);
-    next.addEventListener('click', step3);
+    next.addEventListener('click', stepCat);
     focusHeading();
   }
 
-  // ----- Шаг 3. Основное устройство для теста -----
+  // ----- Шаг 3. Свой котик-персонаж -----
+  function stepCat() {
+    root.innerHTML = `
+      <h1>Ваш персонаж</h1>
+      <p class="step-label">Шаг 3 из 4</p>
+      <form id="cat-form" class="card" novalidate>
+        <p>Котик-исследователь будет встречать вас на сайте: здороваться, наблюдать вместе с вами и радоваться любому итогу проверки.
+           Он ничего не оценивает. Сменить котика можно в любой момент в «Настройках и данных».</p>
+        ${catPickerHtml('cat', answers.cat)}
+        <div class="actions">
+          <button type="button" class="btn btn-ghost" id="backCat">Назад</button>
+          <button type="submit" class="btn btn-primary">Дальше</button>
+        </div>
+      </form>`;
+    const form = root.querySelector('#cat-form');
+    // Выбор сразу показываем — котик на следующих экранах будет уже ваш.
+    form.addEventListener('change', () => {
+      answers.cat = readCatPicker(form, 'cat');
+      setMascotCat(answers.cat);
+    });
+    root.querySelector('#backCat').addEventListener('click', step2);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      answers.cat = readCatPicker(form, 'cat');
+      setMascotCat(answers.cat);
+      step3();
+    });
+    focusHeading();
+  }
+
+  // ----- Шаг 4. Основное устройство для теста -----
   function step3() {
     const options = DEVICE_TYPES.map(
       (d, i) => `
@@ -119,7 +150,7 @@ export function renderOnboarding(root) {
 
     root.innerHTML = `
       <h1>Основное устройство</h1>
-      <p class="step-label">Шаг 3 из 3</p>
+      <p class="step-label">Шаг 4 из 4</p>
       <form id="device-form" class="card">
         <p>Время реакции на разных устройствах измеряется по-разному: у экранов и сенсоров свои задержки.
            Поэтому лучше проходить тест всегда на одном устройстве. На каком вы будете проходить его чаще всего?</p>
@@ -137,7 +168,7 @@ export function renderOnboarding(root) {
         </div>
       </form>`;
 
-    root.querySelector('#back3').addEventListener('click', step2);
+    root.querySelector('#back3').addEventListener('click', stepCat);
     root.querySelector('#device-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = new FormData(e.target);
@@ -146,6 +177,7 @@ export function renderOnboarding(root) {
       const name = String(form.get('deviceName') || '').trim();
 
       await setSetting('age13plus', answers.age13plus);
+      await setSetting('cat', answers.cat);
       await setSetting('primaryDevice', {
         type,
         name: name || typeLabel,
