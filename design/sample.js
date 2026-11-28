@@ -1,5 +1,5 @@
 // Страница-образец оформления: обе темы рядом.
-import '@fontsource-variable/nunito';
+import '@fontsource-variable/inter-tight';
 import '../src/styles/tokens.css';
 import './sample.css';
 import {
@@ -44,7 +44,7 @@ function greeting(date = new Date()) {
 // ----- Шрифты -----
 document.getElementById('font-compare').innerHTML = `
   <div class="font-card is-recommended" style="font-family:var(--font)">
-    <strong>Nunito — шрифт сайта</strong>
+    <strong>Inter Tight — шрифт сайта</strong>
     <p class="big">Лаборатория состояния</p>
     <p>Съешь же ещё этих мягких французских булок, да выпей чаю. Ёлка, щётка, «цитаты» — 0123456789 мс.</p>
     <p style="font-weight:400">Обычный 400 · <span style="font-weight:600">полужирный 600</span> · <span style="font-weight:800">жирный 800</span></p>

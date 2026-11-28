@@ -40,7 +40,7 @@ export function renderOnboarding(root) {
         </ul>
       </section>
 
-      <section class="card card-important">
+      <section class="statement">
         <h2 class="card-title">${icon('Info', 22)}Чего сайт не делает</h2>
         <p>${NOT_MEDICAL}</p>
         <p>${CORRELATION_NOTE}</p>
