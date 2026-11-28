@@ -205,7 +205,7 @@ function stepCardHtml(cycle, { today, todayEntry, pvtToday }) {
         </div>
         <h3>Сегодня</h3>
         ${tasks}
-        <p class="hint">В дневнике отметьте, выполнили ли вы сегодня стратегию.</p>
+        ${cond && !e.answers?.[today] ? '<p class="hint">В дневнике отметьте, выполнили ли вы сегодня стратегию.</p>' : ''}
         <a class="btn" href="#/experiments/view?id=${encodeURIComponent(e.id)}">Открыть эксперимент</a>
       </section>`;
   }
