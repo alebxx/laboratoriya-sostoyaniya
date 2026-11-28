@@ -10,7 +10,6 @@
 //   — общий балл — сумма всех 10 пунктов (после переворота).
 // =====================================================================
 import { PSS } from '../config.js';
-import { daysBetween } from './dates.js';
 
 export const REVERSED_ITEMS = [4, 5, 7, 8];
 export const HELPLESSNESS_ITEMS = [1, 2, 3, 6, 9, 10];
@@ -61,20 +60,23 @@ export function scoreRanges(scale = PSS.scale) {
   };
 }
 
-// Можно ли пройти опросник сейчас: не чаще раза в minDaysBetween дней.
+// Можно ли пройти опросник сейчас: не чаще раза в месяц (календарный).
+// Следующий раз — в тот же день следующего месяца (31.01 → 28.02 или 29.02).
 // Возвращает { allowed, nextDay } — nextDay: с какого дня можно снова.
-export function canTake(results, today, minDaysBetween = PSS.minDaysBetween) {
+export function canTake(results, today, minMonthsBetween = PSS.minMonthsBetween) {
   const regular = results.filter((r) => !r.demo);
   if (regular.length === 0) return { allowed: true, nextDay: null };
   const lastDay = regular.map((r) => r.day).sort().at(-1);
-  const passed = daysBetween(lastDay, today);
-  if (passed >= minDaysBetween) return { allowed: true, nextDay: null };
-  return { allowed: false, nextDay: addDaysSimple(lastDay, minDaysBetween), passed };
+  const nextDay = addMonths(lastDay, minMonthsBetween);
+  if (today >= nextDay) return { allowed: true, nextDay: null };
+  return { allowed: false, nextDay };
 }
 
-function addDaysSimple(day, n) {
+// «2026-01-31» + 1 месяц → «2026-02-28» (если такого числа нет — последний день месяца).
+export function addMonths(day, n) {
   const [y, m, d] = day.split('-').map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d + n));
+  const lastOfTarget = new Date(Date.UTC(y, m - 1 + n + 1, 0)).getUTCDate();
+  const date = new Date(Date.UTC(y, m - 1 + n, Math.min(d, lastOfTarget)));
   return date.toISOString().slice(0, 10);
 }
 

@@ -1,7 +1,9 @@
 // Тесты подсчёта PSS-10: обратные пункты, подшкалы, обе шкалы ответов,
-// проверка ответов, «не чаще раза в 28 дней», изменение с прошлого раза.
+// проверка ответов, «не чаще раза в месяц», изменение с прошлого раза.
 import { describe, it, expect } from 'vitest';
-import { scorePss, reverse, validateAnswers, scoreRanges, canTake, changeFromPrevious, pssRowsForCsv } from '../src/logic/pss.js';
+import { scorePss, reverse, validateAnswers, scoreRanges, canTake, addMonths, changeFromPrevious, pssRowsForCsv } from '../src/logic/pss.js';
+import { PSS_ITEMS, PSS_ANSWER_LABELS, hasPlaceholders } from '../src/data/pss10.js';
+import { PSS } from '../src/config.js';
 
 describe('переворот обратных пунктов', () => {
   it('шкала 1–5: 1↔5, 2↔4, 3=3', () => {
@@ -77,20 +79,41 @@ describe('проверка ответов', () => {
   });
 });
 
-describe('не чаще раза в 28 дней', () => {
+describe('не чаще раза в месяц', () => {
   it('первый раз — можно', () => {
-    expect(canTake([], '2026-03-01', 28)).toEqual({ allowed: true, nextDay: null });
+    expect(canTake([], '2026-03-01')).toEqual({ allowed: true, nextDay: null });
   });
-  it('прошло 27 дней — нельзя, следующий день указан', () => {
-    const r = canTake([{ day: '2026-03-01' }], '2026-03-28', 28);
+  it('месяц ещё не прошёл — нельзя, следующий день указан', () => {
+    const r = canTake([{ day: '2026-03-15' }], '2026-04-14');
     expect(r.allowed).toBe(false);
-    expect(r.nextDay).toBe('2026-03-29');
+    expect(r.nextDay).toBe('2026-04-15');
   });
-  it('прошло 28 дней — можно', () => {
-    expect(canTake([{ day: '2026-03-01' }], '2026-03-29', 28).allowed).toBe(true);
+  it('в тот же день следующего месяца — можно', () => {
+    expect(canTake([{ day: '2026-03-15' }], '2026-04-15').allowed).toBe(true);
+  });
+  it('считается от последнего прохождения', () => {
+    expect(canTake([{ day: '2026-01-10' }, { day: '2026-03-15' }], '2026-04-01').allowed).toBe(false);
+  });
+  it('31-е число → последний день следующего месяца', () => {
+    expect(addMonths('2026-01-31', 1)).toBe('2026-02-28');
+    expect(addMonths('2028-01-31', 1)).toBe('2028-02-29');
+    expect(addMonths('2026-12-05', 1)).toBe('2027-01-05');
   });
   it('демо-результаты не мешают пройти опросник', () => {
-    expect(canTake([{ day: '2026-03-20', demo: true }], '2026-03-21', 28).allowed).toBe(true);
+    expect(canTake([{ day: '2026-03-20', demo: true }], '2026-03-21').allowed).toBe(true);
+  });
+});
+
+describe('тексты опросника', () => {
+  it('10 вопросов без заглушек, шкала 0–4 с подписями крайних ответов', () => {
+    expect(PSS_ITEMS).toHaveLength(10);
+    expect(PSS_ITEMS.every((t) => t.startsWith('Как часто за последний месяц'))).toBe(true);
+    expect(PSS.scale).toBe('0-4');
+    expect(hasPlaceholders('0-4')).toBe(false);
+    const labels = PSS_ANSWER_LABELS['0-4'];
+    expect(labels.map((l) => l.value)).toEqual([0, 1, 2, 3, 4]);
+    expect(labels[0].label).toBe('никогда');
+    expect(labels[4].label).toBe('очень часто');
   });
 });
 

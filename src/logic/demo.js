@@ -145,10 +145,10 @@ export function generateDemoData(today, { seed = 2026, existingDiaryDays = [], p
     demo: true,
   });
 
-  // PSS-10 в начале и в конце периода (ответы выдуманы, шкала 1–5).
+  // PSS-10 в начале и в конце периода (ответы выдуманы, шкала 0–4).
   const pss = [
-    { id: 'demo-pss-1', day: firstDay, completedAt: at(firstDay, 20), context: 'regular', scale: '1-5', answers: [3, 3, 4, 2, 3, 4, 3, 2, 3, 3], total: 32, helplessness: 20, selfEfficacy: 12, demo: true },
-    { id: 'demo-pss-2', day: addDays(today, -1), completedAt: at(addDays(today, -1), 20), context: 'regular', scale: '1-5', answers: [3, 2, 3, 3, 3, 3, 3, 3, 2, 3], total: 28, helplessness: 16, selfEfficacy: 12, demo: true },
+    { id: 'demo-pss-1', day: firstDay, completedAt: at(firstDay, 20), context: 'regular', scale: '0-4', answers: [2, 2, 3, 1, 2, 3, 2, 1, 2, 2], total: 24, helplessness: 14, selfEfficacy: 10, demo: true },
+    { id: 'demo-pss-2', day: addDays(today, -1), completedAt: at(addDays(today, -1), 20), context: 'regular', scale: '0-4', answers: [2, 1, 2, 2, 2, 2, 2, 2, 1, 2], total: 18, helplessness: 10, selfEfficacy: 8, demo: true },
   ];
 
   // Гипотезы: одна завершится сразу (зафиксирована до начала демо-периода),

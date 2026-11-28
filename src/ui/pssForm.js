@@ -23,7 +23,7 @@ export function pssFormHtml() {
           <legend><span class="pss-num">${i + 1}.</span> ${escapeHtml(text)}</legend>
           <div class="radio-row">
             ${labels.map((l) => `
-              <label class="radio-card"><input type="radio" name="q${i + 1}" value="${l.value}" /><span>${escapeHtml(l.label)}</span></label>`).join('')}
+              <label class="radio-card"><input type="radio" name="q${i + 1}" value="${l.value}" /><span>${l.value}${l.label ? ` — ${escapeHtml(l.label)}` : ''}</span></label>`).join('')}
           </div>
         </fieldset>`).join('')}
       <p class="hint">Источник опросника: ${escapeHtml(PSS_SOURCE)}</p>
