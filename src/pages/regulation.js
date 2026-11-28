@@ -8,6 +8,7 @@ import { phaseAt, totalMs, plannedCycles, clampSettings } from '../logic/breathi
 import { TIPS } from '../data/tips.js';
 import { escapeHtml } from '../ui/helpers.js';
 import { icon } from '../ui/icons.js';
+import { mascot } from '../ui/mascot.js';
 
 const PHASE_NAMES = { inhale: 'Вдох', exhale: 'Выдох' };
 
@@ -21,7 +22,10 @@ export function renderRegulation(root) {
       для этого есть самоэксперимент с чередованием дней.</p>
 
     <section class="card" aria-labelledby="h-breath">
-      <h2 id="h-breath" class="card-title">${icon('Wind', 22)}Дыхательное упражнение</h2>
+      <div class="with-mascot">
+        ${mascot('breathe', { size: 84 })}
+        <div><h2 id="h-breath" class="card-title" style="margin:0">${icon('Wind', 22)}Дыхательное упражнение</h2></div>
+      </div>
       <!-- TODO: сверить с источником [предостережение «если неприятно или кружится голова — остановитесь» добавлено разработчиком] -->
       <p>Медленное дыхание в заданном темпе: следите за кругом — он растёт на вдохе и уменьшается на выдохе.
         Дышите спокойно, без усилия. Если неприятно или кружится голова — остановитесь.</p>

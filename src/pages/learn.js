@@ -34,7 +34,9 @@ function renderTopic(root, topic) {
   const next = LEARN_TOPICS[i + 1];
   root.innerHTML = `
     <p><a href="#/learn">← Все темы</a></p>
-    <h1>${escapeHtml(topic.title)}</h1>
+    ${topic.id === 'pvt'
+      ? `<div class="with-mascot">${mascot('sleep', { size: 84 })}<div><h1 style="margin:0">${escapeHtml(topic.title)}</h1></div></div>`
+      : `<h1>${escapeHtml(topic.title)}</h1>`}
     ${DIAGRAMS[topic.id] ? DIAGRAMS[topic.id]() : ''}
     ${topic.sections.map((s) => `
       <section>

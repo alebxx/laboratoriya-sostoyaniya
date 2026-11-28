@@ -35,6 +35,11 @@ export async function renderHome(root) {
   const todayEntry = await get('diary', today);
   const diaryDays = (await getAll('diary')).map((e) => e.day);
   const cheer = weeklyCheer(diaryDays, today);
+  // Вечером и ночью, если записи за день ещё нет, Пипетка спит —
+  // мягкое напоминание о дневнике (без упрёков).
+  const hour = new Date().getHours();
+  const evening = hour >= 20 || hour < 4;
+  const greetPose = !todayEntry && evening ? 'sleep' : 'greet';
 
   // Пилот: какая анкета ждёт заполнения.
   let pilotCard = '';
@@ -52,10 +57,14 @@ export async function renderHome(root) {
 
   root.innerHTML = `
     <section class="card with-mascot" aria-labelledby="hello">
-      ${mascot('greet', { size: 92 })}
+      ${mascot(greetPose, { size: 96 })}
       <div>
         <h1 id="hello" style="margin:0">${greetingFor()}!</h1>
-        <p class="lead" style="margin:4px 0 0">${todayEntry ? 'Запись за сегодня уже есть. Можно посмотреть графики или пройти тест.' : 'Как прошёл день? Запись в дневнике займёт пару минут.'}</p>
+        <p class="lead" style="margin:4px 0 0">${todayEntry
+          ? 'Запись за сегодня уже есть. Можно посмотреть графики или пройти тест.'
+          : evening
+            ? 'Перед сном можно отметить, как прошёл день, — это займёт пару минут.'
+            : 'Как прошёл день? Запись в дневнике займёт пару минут.'}</p>
         <div class="actions" style="margin-top:12px">
           ${todayEntry
             ? `<a class="btn btn-primary" href="#/diary">${icon('NotebookPen', 18)}Открыть запись за сегодня</a>`

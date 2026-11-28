@@ -37,23 +37,38 @@ describe('мягкие поздравления за регулярность', 
   });
 });
 
-describe('талисман', () => {
-  it('7 поз, каждая — SVG без внешних ссылок', () => {
-    expect(MASCOT_POSES).toEqual(['greet', 'magnifier', 'notebook', 'sprouts', 'diploma', 'lock', 'oops']);
+describe('талисман «Пипетка»', () => {
+  it('9 поз, каждая — SVG без внешних ссылок и картинок', () => {
+    expect(MASCOT_POSES).toEqual(['greet', 'magnifier', 'notebook', 'sprouts', 'diploma', 'lock', 'breathe', 'oops', 'sleep']);
     for (const pose of MASCOT_POSES) {
       const svg = mascot(pose);
       expect(svg.startsWith('<svg')).toBe(true);
       expect(svg).not.toMatch(/https?:\/\/|<image|href=/);
     }
   });
-  it('у каждой картинки своя маска (несколько талисманов на странице не мешают друг другу)', () => {
-    const a = mascot('greet').match(/mascot-clip-\d+/)[0];
-    const b = mascot('greet').match(/mascot-clip-\d+/)[0];
-    expect(a).not.toBe(b);
+  it('у каждой позы ночные детали и усы из темы', () => {
+    for (const pose of MASCOT_POSES) {
+      const svg = mascot(pose);
+      expect(svg).toMatch(/display: var\(--night-only\)/);
+      expect(svg).toMatch(/var\(--pip-whisker\)/);
+    }
   });
-  it('декоративный по умолчанию, с подписью — доступен программам чтения', () => {
+  it('у каждой картинки свои маски (несколько Пипеток на странице не мешают друг другу)', () => {
+    const ids = (svg) => [...svg.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+    const a = ids(mascot('greet'));
+    const b = ids(mascot('greet'));
+    expect(a.length).toBeGreaterThan(0);
+    expect(a.some((id) => b.includes(id))).toBe(false);
+    // каждая ссылка url(#…) указывает на маску из той же картинки
+    const svg = mascot('lock');
+    for (const [, ref] of svg.matchAll(/url\(#([^)]+)\)/g)) expect(ids(svg)).toContain(ref);
+  });
+  it('неизвестная поза — приветствие', () => {
+    expect(mascot('нет-такой')).toMatch(/mascot-greet/);
+  });
+  it('декоративная по умолчанию, с подписью — доступна программам чтения', () => {
     expect(mascot('greet')).toMatch(/aria-hidden="true"/);
-    expect(mascot('greet', { label: 'Колбочка машет' })).toMatch(/role="img" aria-label="Колбочка машет"/);
+    expect(mascot('greet', { label: 'Пипетка машет лапкой' })).toMatch(/role="img" aria-label="Пипетка машет лапкой"/);
   });
 });
 

@@ -51,7 +51,7 @@ export const CONTRAST_PAIRS = [
   ['Рамка фокуса / фон', 'focus', 'bg', 3],
   ['Рамка фокуса / карточка', 'focus', 'surface', 3],
   ['Рамка «удалить» / карточка', 'danger', 'surface', 3],
-  ['Контур талисмана / фон', 'mascot-line', 'bg', 3],
+  ['Усы Пипетки / фон', 'pip-whisker', 'bg', 3],
   ...METRICS.flatMap(([key, name]) => [
     [`Цвет «${name}» / карточка`, key, 'surface', 3],
     [`Цвет «${name}» / фон`, key, 'bg', 3],

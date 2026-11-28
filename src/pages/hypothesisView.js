@@ -66,7 +66,7 @@ export async function renderHypothesisView(root) {
       </div>`;
     return `
       <section class="card" aria-labelledby="h-obs">
-        <div class="with-mascot">${mascot('sprouts', { size: 72 })}<div><h2 id="h-obs" style="margin:0">Шаг 4. Наблюдение</h2><p class="hint">Данные растут с каждым днём.</p></div></div>
+        <div class="with-mascot">${mascot('magnifier', { size: 76 })}<div><h2 id="h-obs" style="margin:0">Шаг 4. Наблюдение</h2><p class="hint">Пипетка наблюдает вместе с вами: данные собираются с каждым днём.</p></div></div>
         ${bar(p.a, `A (${labelA})`)}
         ${bar(p.b, `B (${labelB})`)}
         <p class="hint">День учитывается, когда за него есть и фактор, и результат${hyp.plan.lag === 1 ? ' (результат — на следующий день)' : ''}.

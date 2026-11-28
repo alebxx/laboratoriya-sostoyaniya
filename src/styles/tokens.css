@@ -56,13 +56,8 @@
   --m-pulse: #b84379; /* розово-малиновый */
   --m-pss: #3e4858; /* грифельный */
   --m-other: #675d54; /* настроение, свои факторы, причины — нейтральный */
-
-  /* Талисман */
-  --mascot-line: #4a3f36;
-  --mascot-glass: #ffffff;
-  --mascot-liquid: #8fcbbb;
-  --mascot-cheek: #f2a9b8;
-  --mascot-glow: transparent;
+  /* Талисман «Пипетка» */
+  --pip-whisker: #2a2421; /* усы: днём тёмные, ночью светлые */
   --night-only: none; /* «ночные» детали скрыты днём */
 
   /* Графики */
@@ -103,12 +98,8 @@
     --m-pulse: #fe9ac2;
     --m-pss: #848d9b;
     --m-other: #b5ab9f;
-    --mascot-line: #ede8e1;
-    --mascot-glass: #2f3a37;
-    --mascot-liquid: #5e9c8d;
-    --mascot-cheek: #c97f93;
-    --mascot-glow: rgba(124, 196, 178, 0.35);
     --night-only: inline;
+    --pip-whisker: #ede8e1;
     --chart-grid: #332f2a;
     --chart-label: #a59b8f;
     --chart-line: 2.5px;
@@ -145,12 +136,8 @@
   --m-pulse: #fe9ac2;
   --m-pss: #848d9b;
   --m-other: #b5ab9f;
-  --mascot-line: #ede8e1;
-  --mascot-glass: #2f3a37;
-  --mascot-liquid: #5e9c8d;
-  --mascot-cheek: #c97f93;
-  --mascot-glow: rgba(124, 196, 178, 0.35);
   --night-only: inline;
+  --pip-whisker: #ede8e1;
   --chart-grid: #332f2a;
   --chart-label: #a59b8f;
   --chart-line: 2.5px;
