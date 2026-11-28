@@ -16,6 +16,9 @@ import { escapeHtml, formatDateTime, statusInner } from '../ui/helpers.js';
 import { icon, CAUSE_ICONS } from '../ui/icons.js';
 import { mascot } from '../ui/mascot.js';
 import { getParam, rerender } from '../router.js';
+import { conditionForDay } from '../logic/alternation.js';
+import { STRATEGY_ANSWERS } from '../logic/cycle.js';
+import { setStrategyAnswer } from '../db/strategyAnswer.js';
 
 // Сообщение, которое нужно показать после перерисовки страницы
 // (например, «Запись сохранена»).
@@ -40,6 +43,8 @@ export async function renderDiary(root) {
   const entry = await get('diary', day);
   const recent = (await getAll('diary')).sort((a, b) => b.day.localeCompare(a.day)).slice(0, 14);
   const v = entry || {}; // сохранённые значения (или пусто для новой записи)
+  // Эксперимент со стратегией, в расписание которого входит этот день (итог ещё не посчитан).
+  let experiment = (await getAll('experiments')).find((e) => e.strategyId && !e.result && conditionForDay(e, day));
 
   root.innerHTML = `
     <h1>Дневник</h1>
@@ -103,6 +108,8 @@ export async function renderDiary(root) {
           <input type="text" name="causeOther" maxlength="100" value="${escapeHtml(v.causeOther || '')}" />
         </label>
       </section>
+
+      ${experiment ? strategyQuestionHtml(experiment, day, today) : ''}
 
       <section class="card" aria-labelledby="h-factors">
         <h2 id="h-factors">Мои факторы</h2>
@@ -217,6 +224,12 @@ export async function renderDiary(root) {
       }
     }
 
+    // Ответ про стратегию хранится в эксперименте (сохраняем, даже если запись пустая).
+    if (experiment) {
+      const answer = form.querySelector('input[name="strategy"]:checked')?.value || null;
+      if (answer !== (experiment.answers?.[day] || null)) experiment = await setStrategyAnswer(experiment, day, answer);
+    }
+
     const newEntry = buildEntry(day, values, entry, allFactors);
     if (isEntryEmpty(newEntry)) {
       root.querySelector('#status').textContent = 'Ничего не отмечено — отметьте хотя бы одно поле.';
@@ -305,5 +318,25 @@ function careCardHtml() {
       <h2 id="care-title">${escapeHtml(CARE_MESSAGE.title)}</h2>
       ${CARE_MESSAGE.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join('')}
       <button type="button" class="btn btn-primary" id="care-ok">Понятно</button>
+    </section>`;
+}
+
+// Вопрос «Выполнили ли сегодня стратегию?» — только пока идёт эксперимент.
+function strategyQuestionHtml(e, day, today) {
+  const cond = conditionForDay(e, day);
+  const answer = e.answers?.[day] || '';
+  const when = day === today ? 'сегодня' : 'в этот день';
+  return `
+    <section class="card card-important" aria-labelledby="h-strategy">
+      <h2 id="h-strategy" class="card-title">${icon('FlaskConical', 20)}Эксперимент: ${escapeHtml(e.conditionA)}</h2>
+      <p class="hint">По расписанию ${when} — ${cond === 'A' ? 'день со стратегией' : `день ${escapeHtml(e.conditionB)}`}.</p>
+      <fieldset>
+        <legend>Выполнили ли ${when} стратегию «${escapeHtml(e.conditionA)}»?</legend>
+        <div class="radio-row">
+          ${STRATEGY_ANSWERS.map((a) => `
+            <label class="radio-card"><input type="radio" name="strategy" value="${a.value}" ${answer === a.value ? 'checked' : ''} /><span>${a.label}</span></label>`).join('')}
+        </div>
+      </fieldset>
+      <p class="hint">«Не по плану» — если сделали иначе, чем задумано (например, частично или в другое время).</p>
     </section>`;
 }

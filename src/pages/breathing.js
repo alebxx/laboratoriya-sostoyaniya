@@ -1,23 +1,22 @@
 // =====================================================================
-// Страница «Саморегуляция»: дыхательное упражнение и советы.
-// Без обещаний: сайт не утверждает, что упражнение или совет «снижает стресс».
+// Дыхательное упражнение (стратегия «Медленное дыхание» из библиотеки).
+// Без обещаний: сайт не утверждает, что упражнение «снижает стресс».
 // Вместо этого — предложение проверить на себе (самоэксперимент).
 // =====================================================================
 import { BREATHING } from '../config.js';
 import { phaseAt, totalMs, plannedCycles, clampSettings } from '../logic/breathing.js';
-import { TIPS } from '../data/tips.js';
-import { escapeHtml } from '../ui/helpers.js';
 import { icon } from '../ui/icons.js';
 import { mascot } from '../ui/mascot.js';
 
 const PHASE_NAMES = { inhale: 'Вдох', exhale: 'Выдох' };
 
-export function renderRegulation(root) {
+export function renderBreathing(root) {
   let timer = null; // идущее упражнение
   const settings = { inhaleSec: BREATHING.inhaleSec, exhaleSec: BREATHING.exhaleSec, durationMin: BREATHING.durationMin };
 
   root.innerHTML = `
-    <h1>Саморегуляция</h1>
+    <p><a href="#/strategies">← Библиотека стратегий</a></p>
+    <h1>Медленное дыхание</h1>
     <p class="notice">То, что помогает одним, может не помогать другим. Проверьте на себе:
       для этого есть самоэксперимент с чередованием дней.</p>
 
@@ -61,28 +60,7 @@ export function renderRegulation(root) {
       <div class="card card-important">
         <p>Хотите узнать, есть ли разница именно для вас? Проверьте это в самоэксперименте:
           сайт случайно распределит дни «с упражнением» и «без», а потом сравнит их.</p>
-        <a class="btn" id="check-breathing" href="#">${icon('Shuffle', 18)}Проверить, помогает ли это мне</a>
-      </div>
-    </section>
-
-    <section aria-labelledby="h-tips">
-      <h2 id="h-tips">Советы</h2>
-      <p class="hint">Советы взяты из опубликованных рекомендаций — источник указан под каждым.</p>
-      ${TIPS.map((group) => `
-        <section class="card" aria-labelledby="tips-${group.id}">
-          <h3 id="tips-${group.id}">${escapeHtml(group.title)}</h3>
-          <ul class="tips-list">
-            ${group.items.map((t) => `
-              <li>
-                <p>${escapeHtml(t.text)}</p>
-                <p class="hint">Источник: ${t.url
-                  ? `<a href="${escapeHtml(t.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(t.source)}</a>`
-                  : escapeHtml(t.source)}</p>
-              </li>`).join('')}
-          </ul>
-        </section>`).join('')}
-      <div class="actions">
-        <a class="btn btn-ghost" href="#/experiments/new">${icon('Shuffle', 18)}Выбрать совет и проверить его на себе</a>
+        <a class="btn" href="#/experiments/new?strategy=breathing">${icon('Shuffle', 18)}Проверить, помогает ли это мне</a>
       </div>
     </section>`;
 
@@ -102,15 +80,6 @@ export function renderRegulation(root) {
       durationMin: Number(form.querySelector('#duration').value),
     }));
 
-  // Ссылка «Проверить, помогает ли это мне» — с подставленными условиями.
-  const updateCheckLink = () => {
-    readSettings();
-    const a = `дыхательное упражнение ${settings.durationMin} мин (вдох ${settings.inhaleSec} с, выдох ${settings.exhaleSec} с)`;
-    const b = 'без дыхательного упражнения';
-    root.querySelector('#check-breathing').href = `#/experiments/new?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
-  };
-  updateCheckLink();
-  form.addEventListener('input', updateCheckLink);
 
   const updateRemaining = (ms) => {
     const s = Math.max(0, Math.ceil(ms / 1000));

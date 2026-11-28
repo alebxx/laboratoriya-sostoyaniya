@@ -1,7 +1,13 @@
 // =====================================================================
 // Новый самоэксперимент с чередованием условий A и B.
+// Из библиотеки (…?strategy=id): A — стратегия, B — без неё, 14 дней,
+// главный показатель — стресс; усталость и тест показываются дополнительно.
+// Одновременно идёт только один эксперимент.
 // =====================================================================
-import { put } from '../db/repo.js';
+import { put, getAll } from '../db/repo.js';
+import { CYCLE } from '../config.js';
+import { getStrategy, WITHOUT_STRATEGY } from '../data/strategies.js';
+import { activeExperiment } from '../logic/cycle.js';
 import { loadAnalysisContext } from '../db/analysisData.js';
 import { generateSchedule, scheduleSeed, EXPERIMENT_LIMITS } from '../logic/alternation.js';
 import { dayKeyFor, addDays } from '../logic/dates.js';
@@ -15,10 +21,30 @@ export async function renderExperimentNew(root) {
   const outcomes = ctx.metrics.filter((m) => !m.boolean);
   const id = makeId(); // от ID зависит случайное расписание
   const today = dayKeyFor();
+  const strategy = getStrategy(getParam('strategy'));
+  const back = strategy ? '#/strategies' : '#/hypotheses?tab=experiment';
+
+  // Одновременно — только один эксперимент.
+  const active = activeExperiment(await getAll('experiments'), today);
+  if (active) {
+    root.innerHTML = `
+      <p><a href="${back}">← Назад</a></p>
+      <h1>Новый самоэксперимент</h1>
+      <p class="notice">Сейчас уже идёт эксперимент «${escapeHtml(active.conditionA)}». Одновременно проверяется только одна стратегия:
+        так в дневнике остаётся один простой вопрос, а дни не путаются.</p>
+      <a class="btn" href="#/experiments/view?id=${encodeURIComponent(active.id)}">Открыть текущий эксперимент</a>`;
+    return;
+  }
+  const condA = strategy ? strategy.title : getParam('a') || '';
+  const condB = strategy ? WITHOUT_STRATEGY : getParam('b') || '';
+  const primary = strategy ? CYCLE.primaryOutcome : 'stress';
+  // Для стратегий сравниваются стресс, усталость и тест: один главный показатель, остальные — дополнительно.
+  const strategyOutcomes = [CYCLE.primaryOutcome, ...CYCLE.secondaryOutcomes];
 
   root.innerHTML = `
-    <p><a href="#/hypotheses?tab=experiment">← Самоэксперименты</a></p>
-    <h1>Новый самоэксперимент</h1>
+    <p><a href="${back}">← ${strategy ? 'Библиотека стратегий' : 'Самоэксперименты'}</a></p>
+    <h1>${strategy ? `Проверить на себе: ${escapeHtml(strategy.title)}` : 'Новый самоэксперимент'}</h1>
+    ${strategy ? `<p>${escapeHtml(strategy.description)}</p>` : ''}
 
     <section class="card card-important">
       <h2>Зачем случайное чередование</h2>
@@ -28,18 +54,20 @@ export async function renderExperimentNew(root) {
     <form id="exp" class="card" novalidate>
       <label class="field">
         <span>Условие A (что делать в дни A)</span>
-        <input type="text" id="condA" maxlength="80" value="${escapeHtml(getParam('a') || '')}" placeholder="Например: перерыв 10 минут перед тестом" />
+        <input type="text" id="condA" maxlength="120" value="${escapeHtml(condA)}" ${strategy ? 'readonly' : ''} placeholder="Например: перерыв 10 минут перед тестом" />
       </label>
       <label class="field">
         <span>Условие B (что делать в дни B)</span>
-        <input type="text" id="condB" maxlength="80" value="${escapeHtml(getParam('b') || '')}" placeholder="Например: без перерыва" />
+        <input type="text" id="condB" maxlength="120" value="${escapeHtml(condB)}" ${strategy ? 'readonly' : ''} placeholder="Например: без перерыва" />
       </label>
       <label class="field">
-        <span>Что сравнивать (показатель в тот же день)</span>
+        <span>${strategy ? 'Главный показатель (по нему будет итог)' : 'Что сравнивать (показатель в тот же день)'}</span>
         <select id="outcome">
-          ${outcomes.map((m) => `<option value="${m.key}" ${m.key === 'stress' ? 'selected' : ''}>${escapeHtml(m.label)}</option>`).join('')}
+          ${(strategy ? outcomes.filter((m) => strategyOutcomes.includes(m.key)) : outcomes).map((m) => `<option value="${m.key}" ${m.key === primary ? 'selected' : ''}>${escapeHtml(m.label)}</option>`).join('')}
         </select>
       </label>
+      ${strategy ? `<p class="hint">Остальные показатели (${strategyOutcomes.length - 1}) тоже будут показаны рядом, но без отдельного вывода:
+        если делать вывод сразу по нескольким показателям, растёт шанс, что один из них «совпадёт» случайно.</p>` : ''}
       <fieldset>
         <legend>Что вы ожидаете? В дни A показатель будет…</legend>
         <div class="radio-row">
@@ -49,7 +77,7 @@ export async function renderExperimentNew(root) {
       </fieldset>
       <label class="field">
         <span>Сколько дней (от ${EXPERIMENT_LIMITS.minDays} до ${EXPERIMENT_LIMITS.maxDays})</span>
-        <input type="number" id="days" min="${EXPERIMENT_LIMITS.minDays}" max="${EXPERIMENT_LIMITS.maxDays}" step="1" value="${EXPERIMENT_LIMITS.defaultDays}" />
+        <input type="number" id="days" min="${EXPERIMENT_LIMITS.minDays}" max="${EXPERIMENT_LIMITS.maxDays}" step="1" value="${strategy ? CYCLE.experimentDays : EXPERIMENT_LIMITS.defaultDays}" />
       </label>
       <fieldset>
         <legend>Начало</legend>
@@ -68,7 +96,7 @@ export async function renderExperimentNew(root) {
     </section>
 
     <div class="actions">
-      <a class="btn btn-ghost" href="#/hypotheses?tab=experiment">Отмена</a>
+      <a class="btn btn-ghost" href="${back}">Отмена</a>
       <button type="button" class="btn btn-primary" id="start">Начать эксперимент</button>
     </div>`;
 
@@ -119,6 +147,11 @@ export async function renderExperimentNew(root) {
       conditionB: v.conditionB,
       outcomeKey: v.outcomeKey,
       direction: v.direction,
+      ...(strategy ? {
+        strategyId: strategy.id,
+        secondaryKeys: strategyOutcomes.filter((k) => k !== v.outcomeKey),
+      } : {}),
+      answers: {},
       schedule: generateSchedule(v.startDay, v.days, scheduleSeed(id)),
       followed: {},
       result: null,

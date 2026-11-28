@@ -123,8 +123,12 @@ export function setupLayout() {
 }
 
 // Подсветить в меню текущий раздел.
-// Вложенные страницы подсвечивают свой раздел: #/hypotheses/new → «Гипотезы».
-const SECTION_OF = { experiments: 'hypotheses', 'pvt-selfcheck': 'pvt' };
+// Вложенные страницы подсвечивают свой раздел: #/diary → «Наблюдай».
+// Шаг «Наблюдай» объединяет дневник, тест и пульс; «Проверь» — стратегии и эксперимент.
+const SECTION_OF = {
+  diary: 'observe', pvt: 'observe', 'pvt-selfcheck': 'observe', physio: 'observe',
+  experiments: 'strategies', breathing: 'strategies', regulation: 'strategies',
+};
 
 export function markCurrentNav(path) {
   const first = path.split('/')[1] || '';

@@ -1,6 +1,6 @@
 // =====================================================================
-// Страница «Карта состояния»: графики показателей во времени
-// и сравнение двух показателей.
+// Шаг 2 «Заметь»: подсказки (какие стратегии можно проверить по тому,
+// что видно в записях), графики показателей во времени и сравнение двух показателей.
 // Подписи нейтральные: графики показывают изменения, но не оценивают их.
 // =====================================================================
 import { getAll, getAllSettings } from '../db/repo.js';
@@ -12,6 +12,9 @@ import { Chart, themeColors, shortDay, axis, baseOptions } from '../ui/charts.js
 import { escapeHtml } from '../ui/helpers.js';
 import { icon } from '../ui/icons.js';
 import { mascot } from '../ui/mascot.js';
+import { patternHints, strategiesForHint } from '../logic/cycle.js';
+import { STRATEGIES } from '../data/strategies.js';
+import { CYCLE } from '../config.js';
 import { metricStyle, metricClass, metricColor, metricGroup } from '../ui/metricStyle.js';
 
 // Выбор пользователя сохраняется, пока открыта вкладка.
@@ -42,7 +45,8 @@ export async function renderCharts(root) {
   ]);
   const data = { diary, pvtSessions, physio, pss };
   const primaryType = settings.primaryDevice?.type || null;
-  const metrics = allMetrics(settings.customFactors || []);
+  // Пульс и давление — только если раздел включён в настройках.
+  const metrics = allMetrics(settings.customFactors || []).filter((m) => m.source !== 'physio' || settings.showPhysio);
   const today = dayKeyFor();
   const allDays = [...diary, ...pvtSessions, ...physio, ...pss].map((r) => r.day).filter(Boolean).sort();
   const firstDataDay = allDays[0] || today;
@@ -50,8 +54,10 @@ export async function renderCharts(root) {
   let charts = []; // созданные графики — чтобы удалить их при перерисовке
 
   root.innerHTML = `
-    <h1>Карта состояния</h1>
-    <p class="lead">Как менялись ваши показатели во времени. Графики ничего не оценивают — они только показывают значения.</p>
+    <h1>Шаг 2. Заметь</h1>
+    <p class="lead">Что меняется вместе со стрессом и какие стратегии можно проверить. Графики ничего не оценивают — они только показывают значения.</p>
+    ${hintsHtml(diary, today)}
+    <h2>Карта состояния</h2>
 
     <section class="card controls" aria-label="Настройки графиков">
       <fieldset>
@@ -350,4 +356,35 @@ function scatterChart(canvas, ma, mb, pairs, colors) {
     data: { datasets: [{ label: 'Дни', data: pairs.map((p) => ({ x: p.a, y: p.b, day: p.day })), backgroundColor: metricColor(mb.key), borderColor: colors.surface, borderWidth: 2, pointRadius: 6, pointHoverRadius: 8 }] },
     options,
   });
+}
+
+// Подсказки: какие стратегии можно проверить по тому, что видно в дневнике.
+function hintsHtml(diary, today) {
+  const days = new Set(diary.map((e) => e.day)).size;
+  const hints = patternHints(diary, today);
+  if (!hints.length) {
+    return `
+      <section class="card" aria-labelledby="h-hints">
+        <h2 id="h-hints" class="card-title">${icon('Lightbulb', 20)}Что можно проверить</h2>
+        <p>${days < CYCLE.observeDays
+          ? `Пока записей мало (${days} из ${CYCLE.observeDays} дней недели наблюдения). Когда их станет больше, здесь появятся подсказки.`
+          : 'Явных совпадений в записях пока не видно. Можно выбрать любую стратегию из библиотеки.'}</p>
+        <a class="btn" href="#/strategies">Библиотека стратегий</a>
+      </section>`;
+  }
+  return `
+    <section class="card card-important" aria-labelledby="h-hints">
+      <h2 id="h-hints" class="card-title">${icon('Lightbulb', 20)}Что можно проверить</h2>
+      <ul class="hint-list">
+        ${hints.map((h) => {
+          const list = strategiesForHint(h, STRATEGIES);
+          return `
+            <li>
+              <p>${escapeHtml(h.text)} Возможно, это совпадение, а не причина — но это повод проверить.</p>
+              ${list.length ? `<p>Можно проверить на себе: ${list.map((st) => `<a href="#/experiments/new?strategy=${encodeURIComponent(st.id)}">${escapeHtml(st.title)}</a>`).join('; ')}.</p>` : ''}
+            </li>`;
+        }).join('')}
+      </ul>
+      <p class="hint">Подсказки построены по простым правилам на ваших записях. Проверить, помогает ли стратегия именно вам, можно только экспериментом.</p>
+    </section>`;
 }

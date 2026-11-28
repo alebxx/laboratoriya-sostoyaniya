@@ -26,7 +26,7 @@ export function renderOnboarding(root) {
       <div class="with-mascot">
         ${mascot('greet', { size: 110 })}
         <div>
-          <p class="step-label">Шаг 1 из 4</p>
+          <p class="step-label">Шаг 1 из 5</p>
           <h1 style="margin-top:0">Добро пожаловать в «Лабораторию состояния»</h1>
         </div>
       </div>
@@ -72,7 +72,7 @@ export function renderOnboarding(root) {
   function step2() {
     root.innerHTML = `
       <h1>Возраст</h1>
-      <p class="step-label">Шаг 2 из 4</p>
+      <p class="step-label">Шаг 2 из 5</p>
       <section class="card">
         <p>Сайт рассчитан на пользователей ${MIN_AGE} лет и старше. Дату рождения мы не спрашиваем.</p>
         <p id="age-q"><strong>Вам ${MIN_AGE} лет или больше?</strong></p>
@@ -112,7 +112,7 @@ export function renderOnboarding(root) {
   function stepCat() {
     root.innerHTML = `
       <h1>Ваш персонаж</h1>
-      <p class="step-label">Шаг 3 из 4</p>
+      <p class="step-label">Шаг 3 из 5</p>
       <form id="cat-form" class="card" novalidate>
         <p>Котик-исследователь будет встречать вас на сайте: здороваться, наблюдать вместе с вами и радоваться любому итогу проверки.
            Он ничего не оценивает. Сменить котика можно в любой момент в «Настройках и данных».</p>
@@ -150,7 +150,7 @@ export function renderOnboarding(root) {
 
     root.innerHTML = `
       <h1>Основное устройство</h1>
-      <p class="step-label">Шаг 4 из 4</p>
+      <p class="step-label">Шаг 4 из 5</p>
       <form id="device-form" class="card">
         <p>Время реакции на разных устройствах измеряется по-разному: у экранов и сенсоров свои задержки.
            Поэтому лучше проходить тест всегда на одном устройстве. На каком вы будете проходить его чаще всего?</p>
@@ -164,7 +164,7 @@ export function renderOnboarding(root) {
         </label>
         <div class="actions">
           <button type="button" class="btn btn-ghost" id="back3">Назад</button>
-          <button type="submit" class="btn btn-primary">Начать</button>
+          <button type="submit" class="btn btn-primary">Дальше</button>
         </div>
       </form>`;
 
@@ -176,28 +176,56 @@ export function renderOnboarding(root) {
       const typeLabel = DEVICE_TYPES.find((d) => d.value === type).label;
       const name = String(form.get('deviceName') || '').trim();
 
-      await setSetting('age13plus', answers.age13plus);
-      await setSetting('cat', answers.cat);
-      await setSetting('primaryDevice', {
-        type,
-        name: name || typeLabel,
-        userAgent: navigator.userAgent,
-      });
-      await setSetting('firstRunAt', new Date().toISOString());
-      await setSetting('onboardingDone', true);
-
-      // Просим браузер не удалять данные сайта при нехватке места.
-      // Браузер может согласиться молча, спросить или отказать — это нормально.
-      if (navigator.storage && navigator.storage.persist) {
-        try {
-          await navigator.storage.persist();
-        } catch {
-          /* не страшно */
-        }
-      }
-      location.hash = '#/';
+      answers.device = { type, name: name || typeLabel, userAgent: navigator.userAgent };
+      stepCycle();
     });
     focusHeading();
+  }
+
+  // ----- Шаг 5. Как устроена работа: цикл -----
+  function stepCycle() {
+    root.innerHTML = `
+      <p class="step-label">Шаг 5 из 5</p>
+      <h1>Как это работает</h1>
+      <section class="card">
+        <p>Сайт помогает найти, что именно <strong>вам</strong> помогает справляться со стрессом. Для этого есть цикл из четырёх шагов:</p>
+        <ol class="cycle-steps">
+          <li><strong>Наблюдай.</strong> Неделю отмечайте в дневнике, как прошёл день, и проходите трёхминутный тест.</li>
+          <li><strong>Заметь.</strong> Сайт покажет, что меняется вместе со стрессом, и подскажет, какие стратегии можно проверить.</li>
+          <li><strong>Проверь.</strong> Выберите стратегию. Сайт случайно распределит дни «с ней» и «без неё» и через 2 недели сравнит их.</li>
+          <li><strong>Используй.</strong> Итог попадёт в «Мой набор помощи». Потом можно проверить следующую стратегию.</li>
+        </ol>
+        ${answers.age13plus ? '<p>Ещё есть опросник PSS-10: его стоит пройти в начале и через 4 недели, чтобы сравнить.</p>' : ''}
+      </section>
+      <div class="actions">
+        <button type="button" class="btn" id="back4">Назад</button>
+        <button type="button" class="btn btn-primary" id="go-observe">Начать неделю наблюдения</button>
+        ${answers.age13plus ? '<button type="button" class="btn" id="go-pss">Сначала пройти PSS-10</button>' : ''}
+      </div>`;
+    root.querySelector('#back4').addEventListener('click', step3);
+    root.querySelector('#go-observe').addEventListener('click', () => finish('#/'));
+    root.querySelector('#go-pss')?.addEventListener('click', () => finish('#/pss'));
+    focusHeading();
+  }
+
+  // Сохранить ответы первого входа и перейти дальше.
+  async function finish(target) {
+    await setSetting('age13plus', answers.age13plus);
+    await setSetting('cat', answers.cat);
+    await setSetting('primaryDevice', answers.device);
+    await setSetting('firstRunAt', new Date().toISOString());
+    await setSetting('onboardingDone', true);
+
+    // Просим браузер не удалять данные сайта при нехватке места.
+    // Браузер может согласиться молча, спросить или отказать — это нормально.
+    if (navigator.storage && navigator.storage.persist) {
+      try {
+        await navigator.storage.persist();
+      } catch {
+        /* не страшно */
+      }
+    }
+    location.hash = target;
   }
 
   function focusHeading() {

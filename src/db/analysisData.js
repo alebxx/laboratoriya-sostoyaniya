@@ -7,6 +7,7 @@ import { allMetrics } from '../logic/series.js';
 import { buildObservations, evaluate } from '../logic/hypothesis.js';
 import { experimentObservations, evaluateExperiment, isFinished } from '../logic/alternation.js';
 import { dayKeyFor } from '../logic/dates.js';
+import { median } from '../logic/stats.js';
 
 export async function loadAnalysisContext() {
   const [diary, pvtSessions, physio, pss, settings] = await Promise.all([
@@ -37,7 +38,15 @@ export async function ensureExperimentResult(exp, ctx) {
   if (exp.result || !isFinished(exp, dayKeyFor())) return exp;
   const observations = experimentObservations(exp, ctx.metrics, ctx.data, ctx.primaryType);
   const result = evaluateExperiment(exp, observations);
-  const updated = { ...exp, result, resultComputedAt: new Date().toISOString() };
+  // Дополнительные показатели (у стратегий): только медианы, без вывода.
+  const secondary = {};
+  for (const key of exp.secondaryKeys || []) {
+    const obs = experimentObservations({ ...exp, outcomeKey: key }, ctx.metrics, ctx.data, ctx.primaryType);
+    const a = obs.filter((o) => o.group === 'A').map((o) => o.outcome);
+    const b = obs.filter((o) => o.group === 'B').map((o) => o.outcome);
+    secondary[key] = { nA: a.length, nB: b.length, medianA: a.length ? median(a) : null, medianB: b.length ? median(b) : null, observations: obs };
+  }
+  const updated = { ...exp, result: { ...result, secondary }, resultComputedAt: new Date().toISOString() };
   await put('experiments', updated);
   return updated;
 }

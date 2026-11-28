@@ -3,7 +3,7 @@
 // Адрес страницы хранится после знака # (например, …/#/diary).
 // Так сайт работает на GitHub Pages без настройки сервера.
 // =====================================================================
-import { getSetting } from './db/repo.js';
+import { getSetting, setSetting, getAll } from './db/repo.js';
 import { mascot, setMascotCat } from './ui/mascot.js';
 import { markCurrentNav } from './ui/layout.js';
 import { renderOnboarding } from './pages/onboarding.js';
@@ -20,7 +20,10 @@ import { renderExperimentNew } from './pages/experimentNew.js';
 import { renderExperimentView } from './pages/experimentView.js';
 import { renderPhysio } from './pages/physio.js';
 import { renderPss } from './pages/pss.js';
-import { renderRegulation } from './pages/regulation.js';
+import { renderBreathing } from './pages/breathing.js';
+import { renderObserve } from './pages/observe.js';
+import { renderStrategies } from './pages/strategies.js';
+import { renderToolkit } from './pages/toolkit.js';
 import { renderLearn } from './pages/learn.js';
 import { renderPilot } from './pages/pilot.js';
 
@@ -40,7 +43,10 @@ const routes = {
   '/experiments/view': renderExperimentView,
   '/physio': renderPhysio,
   '/pss': renderPss,
-  '/regulation': renderRegulation,
+  '/observe': renderObserve,
+  '/strategies': renderStrategies,
+  '/breathing': renderBreathing,
+  '/toolkit': renderToolkit,
   '/learn': renderLearn,
   '/pilot': renderPilot,
 };
@@ -61,8 +67,15 @@ export function getParam(name) {
 
 let cleanup = null;
 
+// Старые адреса ведут на новые страницы (закладки не ломаются).
+const REDIRECTS = { '/regulation': '#/strategies' };
+
 async function render() {
   const path = currentPath();
+  if (REDIRECTS[path]) {
+    location.replace(REDIRECTS[path]);
+    return;
+  }
 
   // Пока человек не прошёл первый вход, показываем только его.
   const onboardingDone = await getSetting('onboardingDone', false);
@@ -71,6 +84,10 @@ async function render() {
     return;
   }
   document.body.classList.toggle('is-onboarding', path === '/onboarding');
+  // Пульс и давление скрыты по умолчанию. Если записи уже есть — раздел остаётся включённым.
+  if ((await getSetting('showPhysio')) === undefined) {
+    await setSetting('showPhysio', (await getAll('physio')).length > 0);
+  }
   // Котик-персонаж, выбранный пользователем (по умолчанию — Пипетка).
   setMascotCat(await getSetting('cat', null));
   document.getElementById('offline-mascot').innerHTML = mascot('oops', { size: 40 });

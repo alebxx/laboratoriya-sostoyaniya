@@ -38,6 +38,15 @@ export async function renderSettings(root) {
       <p class="hint">Котик меняется сразу на всех страницах сайта.</p>
     </section>
 
+    <section class="card metric-pulse" aria-labelledby="h-physio">
+      <h2 id="h-physio" class="card-title"><span class="metric-badge">${icon('HeartPulse', 20)}</span>Пульс и давление</h2>
+      <label class="check-row">
+        <input type="checkbox" id="show-physio" ${s.showPhysio ? 'checked' : ''} />
+        <span>Записывать пульс и давление (необязательно). Раздел появится в шаге «Наблюдай», показатели — на графиках.</span>
+      </label>
+      <p class="hint">Если выключить, уже сделанные записи не удаляются — они просто скрываются.</p>
+    </section>
+
     <section class="card" aria-labelledby="h-device">
       <h2 id="h-device">Основное устройство для теста</h2>
       <p>Сейчас: <strong>${escapeHtml(device.name || 'не выбрано')}</strong></p>
@@ -158,6 +167,11 @@ export async function renderSettings(root) {
   setupThemePicker(root, 'theme');
 
   // Смена котика — сохраняется сразу при выборе
+  root.querySelector('#show-physio').addEventListener('change', async (e) => {
+    await setSetting('showPhysio', e.target.checked);
+    showStatus(document.getElementById('status'), e.target.checked ? 'Пульс и давление включены.' : 'Пульс и давление скрыты.');
+  });
+
   root.querySelector('#cat-form').addEventListener('change', async (e) => {
     const cat = readCatPicker(e.currentTarget, 'cat');
     await setSetting('cat', cat);
