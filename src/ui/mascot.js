@@ -36,7 +36,8 @@
 
 // ----- Котики: окрас и форма ушей -----
 // coat — основной цвет пятен, stripe — полоски, ear — внутри уха,
-// cheek — щёчки, nose — носик, toe — пальчики, white — белый мех, line — контур.
+// cheek — щёчки, nose — носик, toe — пальчики, white — белый мех, line — контур,
+// eye и mouth — глаза и ротик (необязательно; по умолчанию цвета контура).
 // ears: 'up' — стоячие уши, 'fold' — вислоухий.
 export const CATS = [
   {
@@ -62,6 +63,16 @@ export const CATS = [
   {
     id: 'kaplya', name: 'Капелька', description: 'бежевая полосатая',
     ears: 'up', colors: { coat: '#cdb7a1', stripe: '#a68e77', ear: '#f2bfa8', cheek: '#f3cfc0', nose: '#d9958a', toe: '#a89f96', white: '#fffdf6', line: '#1f1b19' },
+  },
+  {
+    // Чёрная: глаза и ротик светлые, иначе их не видно на тёмной шерсти.
+    id: 'stupka', name: 'Ступка', description: 'чёрная',
+    ears: 'up', colors: { coat: '#2a2523', stripe: 'transparent', ear: '#c98a84', cheek: '#b9746f', nose: '#d99a90', toe: '#6b625d', white: '#3b3533', line: '#100d0c', eye: '#f2c94c', mouth: '#d9cbbd' },
+  },
+  {
+    // Черепаховая: тёмные и рыжие пятна вперемешку.
+    id: 'probirka', name: 'Пробирка', description: 'черепаховая',
+    ears: 'up', colors: { coat: '#3b2e29', stripe: '#c9773a', ear: '#f2b2a6', cheek: '#f0a98a', nose: '#d98270', toe: '#7a4f33', white: '#e39a52', line: '#1f1b19' },
   },
 ];
 
@@ -131,6 +142,24 @@ export function catName(id = currentCat) {
   return getCat(id).name;
 }
 
+// Глаза и ротик рисуем своими переменными (--coat-eye, --coat-mouth),
+// чтобы у чёрного котика их можно было сделать светлыми.
+const FACE = [
+  ['r="10.5" fill="var(--coat-line)"', 'r="10.5" fill="var(--coat-eye)"'], // открытые глаза
+  ['d="M63 99 Q74 107 85 99 M115 99 Q126 107 137 99" fill="none" stroke="var(--coat-line)"', 'd="M63 99 Q74 107 85 99 M115 99 Q126 107 137 99" fill="none" stroke="var(--coat-eye)"'], // закрытые
+  ['L118 107" fill="none" stroke="var(--coat-line)"', 'L118 107" fill="none" stroke="var(--coat-eye)"'], // глаза-крестики
+  ['Q105.5 118 111 110" fill="none" stroke="var(--coat-line)"', 'Q105.5 118 111 110" fill="none" stroke="var(--coat-mouth)"'], // улыбка
+  ['T112 115" fill="none" stroke="var(--coat-line)"', 'T112 115" fill="none" stroke="var(--coat-mouth)"'], // волнистый ротик
+  ['cx="100" cy="114" rx="4" ry="5" fill="var(--coat-line)"', 'cx="100" cy="114" rx="4" ry="5" fill="var(--coat-mouth)"'], // ротик «о»
+  // Блокнот, свиток диплома и скважина замочка — всегда белые, а не цвета шерсти.
+  ['x="-14" y="150" width="46" height="58" rx="6" fill="var(--coat-white)"', 'x="-14" y="150" width="46" height="58" rx="6" fill="#fffdf8"'],
+  ['x="146" y="194" width="54" height="17" rx="8.5" fill="var(--coat-white)"', 'x="146" y="194" width="54" height="17" rx="8.5" fill="#fffdf8"'],
+  ['x="98" y="186" width="4" height="9" rx="2" fill="var(--coat-white)"', 'x="98" y="186" width="4" height="9" rx="2" fill="#fffdf8"'],
+];
+for (const pose of Object.keys(POSES)) {
+  for (const [from, to] of FACE) POSES[pose] = POSES[pose].replaceAll(from, to);
+}
+
 let counter = 0;
 
 // SVG-строка котика. label — подпись для программ чтения с экрана
@@ -148,7 +177,8 @@ export function mascot(pose = 'greet', { size = 120, label = '', cat = currentCa
   const uid = `p${++counter}`; // у каждой картинки свои маски — несколько котиков на странице не мешают друг другу
   const height = Math.round((size * 220) / 230);
   const a11y = label ? `role="img" aria-label="${label}"` : 'aria-hidden="true" focusable="false"';
-  const vars = Object.entries(kitty.colors).map(([k, v]) => `--coat${k === 'coat' ? '' : `-${k}`}: ${v}`).join('; ');
+  const colors = { eye: kitty.colors.line, mouth: kitty.colors.line, ...kitty.colors };
+  const vars = Object.entries(colors).map(([k, v]) => `--coat${k === 'coat' ? '' : `-${k}`}: ${v}`).join('; ');
   return `<svg class="mascot mascot-${name} cat-${kitty.id}" viewBox="-15 0 230 220" width="${size}" height="${height}" ${a11y}
     style="overflow: visible; ${vars}">${body.replaceAll('-UID', `-${uid}`)}</svg>`;
 }

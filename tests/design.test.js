@@ -73,8 +73,8 @@ describe('талисман «Пипетка»', () => {
 });
 
 describe('выбор котика', () => {
-  it('6 котиков, у каждого все 9 поз без заготовок редактора', () => {
-    expect(CATS.map((c) => c.id)).toEqual(['pipetka', 'menzurka', 'kolba', 'buretka', 'retorta', 'kaplya']);
+  it('8 котиков, у каждого все 9 поз без заготовок редактора', () => {
+    expect(CATS.map((c) => c.id)).toEqual(['pipetka', 'menzurka', 'kolba', 'buretka', 'retorta', 'kaplya', 'stupka', 'probirka']);
     for (const c of CATS) {
       for (const pose of MASCOT_POSES) {
         const svg = mascot(pose, { cat: c.id });
@@ -83,6 +83,15 @@ describe('выбор котика', () => {
         expect(svg).not.toMatch(/\{\{/); // {{accent}} в рисунке — чёрная колба
       }
     }
+  });
+  it('у чёрного котика светлые глаза и ротик, у остальных — цвета контура', () => {
+    for (const pose of MASCOT_POSES) {
+      const svg = mascot(pose, { cat: 'stupka' });
+      expect(svg).toContain('var(--coat-eye)');
+      expect(svg).toContain('var(--coat-mouth)');
+      expect(svg).toContain('--coat-eye: #f2c94c');
+    }
+    expect(mascot('greet', { cat: 'pipetka' })).toContain('--coat-eye: #2a2421');
   });
   it('вислоухие уши — только у Мензурки', () => {
     const fold = 'M42 70 Q36 40 62 34';
